@@ -1,0 +1,98 @@
+{
+  "project_info": {
+    "project_number": "155764734285",
+    "firebase_url": "https://whereispuppy-c40ad-default-rtdb.firebaseio.com",
+    "project_id": "whereispuppy-c40ad",
+    "storage_bucket": "whereispuppy-c40ad.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:155764734285:android:6b8fb41c3f4ba6c9d59f04",
+        "android_client_info": {
+          "package_name": "com.company.whereispuppy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "155764734285-rdf835uhng31l5mur5prk7iaema14t5v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_KUSkmejPtjY-TmHJr7tmI2LLM8Z4sRQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "155764734285-rdf835uhng31l5mur5prk7iaema14t5v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:155764734285:android:09cd8a457985c94dd59f04",
+        "android_client_info": {
+          "package_name": "com.example.myapplication"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "155764734285-rdf835uhng31l5mur5prk7iaema14t5v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_KUSkmejPtjY-TmHJr7tmI2LLM8Z4sRQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "155764734285-rdf835uhng31l5mur5prk7iaema14t5v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:155764734285:android:7a942a32e2cd2dbad59f04",
+        "android_client_info": {
+          "package_name": "com.example.testforloginregister"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "155764734285-rdf835uhng31l5mur5prk7iaema14t5v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_KUSkmejPtjY-TmHJr7tmI2LLM8Z4sRQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "155764734285-rdf835uhng31l5mur5prk7iaema14t5v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
