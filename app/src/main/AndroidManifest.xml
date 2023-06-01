@@ -29,6 +29,14 @@
             android:name=".Map"
             android:label="Map Activity" />
 
+        <activity
+            android:name=".LoginActivity"
+            android:label="Login Activity" />
+
+        <activity
+            android:name=".RegisterActivity"
+            android:label="Register Activity" />
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCz1Nc5YwBaQuGbmz8cva4F7IGugohfggk" />
