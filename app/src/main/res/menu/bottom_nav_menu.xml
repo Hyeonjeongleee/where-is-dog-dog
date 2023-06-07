@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_myinfo"
+        android:enabled="true"
+        android:orderInCategory="1"
+        android:icon="@drawable/baseline_child_care_24"
+        android:title="My Dog" />
+    <item
+        android:id="@+id/action_map"
+        android:enabled="true"
+        android:orderInCategory="2"
+        android:icon="@drawable/baseline_map_24"
+        android:title="Map" />
+    <item
+        android:id="@+id/action_chat"
+        android:enabled="true"
+        android:orderInCategory="3"
+        android:icon="@drawable/baseline_chat_24"
+        android:title="Chat" />
+</menu>

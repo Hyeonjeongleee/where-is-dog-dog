@@ -38,12 +38,4 @@
         app:layout_anchorGravity="center"
         app:popupTheme="@style/Theme.MyApplication.PopupOverlay" />
 
-    <Button
-        android:id="@+id/button3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="map"
-        android:layout_gravity="center_horizontal|bottom"
-        android:layout_marginBottom="200dp"/>
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

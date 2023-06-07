@@ -37,10 +37,6 @@ public class MainActivity extends AppCompatActivity {
             startLocationUpdates();
         }
 
-        binding.button3.setOnClickListener(view -> {
-            Intent intent = new Intent(MainActivity.this, Map.class);
-            startActivity(intent);
-        });
     }
 
     private boolean checkLocationPermission() {
