@@ -17,8 +17,8 @@ public class MainWithNavBar extends AppCompatActivity {
     private FragmentManager fm;
     private FragmentTransaction ft;
     private ProfileFragment profileFragment;
-    private BlankFragment blankFragment;
     private MapFragment mapFragment;
+    private ChatFragment chatFragment;
 
 
     @Override
@@ -47,7 +47,7 @@ public class MainWithNavBar extends AppCompatActivity {
         });
 
         profileFragment = new ProfileFragment();
-        blankFragment = new BlankFragment();
+        chatFragment = new ChatFragment();
         mapFragment = new MapFragment();
         setFrag(0);  // 첫 프래그먼트 화면 지정
     }
@@ -67,7 +67,7 @@ public class MainWithNavBar extends AppCompatActivity {
                 ft.commit();
                 break;
             case 2:
-                ft.replace(R.id.main_frame, blankFragment);
+                ft.replace(R.id.main_frame, chatFragment);
                 ft.commit();
                 break;
 
