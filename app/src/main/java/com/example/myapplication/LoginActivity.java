@@ -14,6 +14,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -22,6 +24,7 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth mFirebaseAuth;      // 파이어베이스 인증 처리
     private DatabaseReference mDatabaseRef;  // 실시간 데이터베이스 - 서버에 연동시킬 수 있는 객체
     private EditText mEtEmail, mEtPwd;       // 로그인 입력필드
+    private FirebaseUser mFirebaseUser;
 
 
     @Override
@@ -51,11 +54,20 @@ public class LoginActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             // 로그인 성공
-                            Intent intent = new Intent(LoginActivity.this, MainWithNavBar.class);
-                            startActivity(intent);
-                            finish(); // 로그인 완료하면 현재 login_activity를 쓸 일이 없기 때문에 현재 액티비티 파괴
+                            mFirebaseUser = mFirebaseAuth.getCurrentUser();
+                            if (mFirebaseUser != null) {
+                                String uid = mFirebaseUser.getUid();
+
+                                // 메인 액티비티로 돌아갈 때 입력 값 돌려줌. 사용자 UID 넘겨주기
+                                Intent intent = new Intent();
+                                intent.putExtra("value", uid);
+                                setResult(RESULT_OK, intent);
+                                MainActivity.userUid = uid;
+
+                                finish(); // 로그인 완료하면 현재 login_activity를 쓸 일이 없기 때문에 현재 액티비티 파괴
+                            }
                         } else {
-                            Toast.makeText(LoginActivity.this, "로그인 실패!!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "로그인 실패!", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });

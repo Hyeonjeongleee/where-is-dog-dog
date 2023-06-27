@@ -11,7 +11,11 @@ public class UserAccount {
     private String password;  // 비밀번호
 
 
-    public UserAccount() { }  //파이어베이스에서 빈 생성자를 만들어줘야 데이터베이스 조회해올때 오류가 안남.
+    public UserAccount() {
+        idToken = "";
+        emailId = "";
+        password = "";
+    }  //파이어베이스에서 빈 생성자를 만들어줘야 데이터베이스 조회해올때 오류가 안남.
 
     public String getIdToken() {
         return idToken;

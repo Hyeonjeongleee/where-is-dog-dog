@@ -1,15 +1,17 @@
 package com.example.myapplication;
 
-import android.Manifest;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.os.Bundle;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.os.Bundle;
+import android.view.MenuItem;
 
 import com.example.myapplication.databinding.ActivityMainBinding;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -17,30 +19,117 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationBarView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GetTokenResult;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static String userUid;
+    // 메인에서 가지고 다닐 userAccount 변수 선언
+
+    private BottomNavigationView bottomNavigationView;
+    private FragmentManager fm;
+    private FragmentTransaction ft;
+    private HomeFragment homeFragment;
+    private MapFragment mapFragment;
+    private ChatFragment chatFragment;
+    private MyinfoFragment myinfoFragment;
+    private MyinfoAfterLoginFragment myinfoAfterLoginFragment;
+    private RequestLoginFragment requestLoginFragment;
+
+    // 실시간 위치용 코드
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 100;
     private ActivityMainBinding binding;
     private FusedLocationProviderClient fusedLocationClient;
     private LocationRequest locationRequest;
     private LocationCallback locationCallback;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //실시간 위치용 코드
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
         // 위치 권한 확인 및 요청
         if (checkLocationPermission()) {
             startLocationUpdates();
         }
 
+        //nav-bar
+        setContentView(R.layout.activity_main);
+
+        bottomNavigationView = findViewById(R.id.bottomNavi);
+        bottomNavigationView.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_home:
+                        setFrag(0);
+                        break;
+                    case R.id.action_map:
+                        setFrag(1);
+                        break;
+                    case R.id.action_chat:
+                        setFrag(2);
+                        break;
+                    case R.id.action_myinfo:
+                        setFrag(3);
+                        break;
+
+                }
+                return true;
+            }
+        });
+
+        homeFragment = new HomeFragment();
+        mapFragment = new MapFragment();
+        chatFragment = new ChatFragment();
+        myinfoFragment = new MyinfoFragment();
+        myinfoAfterLoginFragment = new MyinfoAfterLoginFragment();
+        requestLoginFragment = new RequestLoginFragment();
+        setFrag(0);  // 첫 프래그먼트 화면 지정
     }
 
+
+    // 프래그먼트 교체가 일어나는 실행문
+    private void setFrag(int n) {
+        fm = getSupportFragmentManager();
+        ft = fm.beginTransaction();
+        switch (n) {
+            case 0:
+                ft.replace(R.id.main_frame, homeFragment);
+                ft.commit();  // 저장을 의미
+                break;
+            case 1:
+                if (userUid == null) ft.replace(R.id.main_frame, requestLoginFragment);
+                else ft.replace(R.id.main_frame, mapFragment);
+                ft.commit();
+                break;
+            case 2:
+                if (userUid == null) ft.replace(R.id.main_frame, requestLoginFragment);
+                else ft.replace(R.id.main_frame, chatFragment);
+                ft.commit();
+                break;
+            case 3:
+                if (userUid == null) ft.replace(R.id.main_frame, myinfoFragment);
+                else ft.replace(R.id.main_frame, myinfoAfterLoginFragment);
+                ft.commit();
+                break;
+
+        }
+    }
+
+
+    //실시간 위치용 코드
     private boolean checkLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
             return false;
         }
@@ -90,4 +179,5 @@ public class MainActivity extends AppCompatActivity {
         if (fusedLocationClient != null) {
         }
     }
+
 }

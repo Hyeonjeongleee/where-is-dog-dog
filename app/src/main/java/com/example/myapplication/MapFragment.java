@@ -42,10 +42,18 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+import android.os.Handler;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback, ActivityCompat.OnRequestPermissionsResultCallback {
 
@@ -119,33 +127,33 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
 //
 //    }
 
-    @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
-
         Log.d(TAG, "onMapReady: 들어옴 ");
-
         mMap = googleMap;
 
         // 지도의 초기위치 이동
         setDefaultLocation();
 
         // 런타임 퍼미션 처리
-        // 1. 위치 퍼미션을 가지고 있는지 확인합니다.
-
-        // **Activity 기존 코드**
-//        int hasFineLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
-//        int hasCoarseLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
-
-//      Fragment로 추가한 코드
         int hasFineLocationPermission = ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION);
         int hasCoarseLocationPermission = ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_COARSE_LOCATION);
 
+        if (hasFineLocationPermission == PackageManager.PERMISSION_GRANTED && hasCoarseLocationPermission == PackageManager.PERMISSION_GRANTED) {
+            // 퍼미션을 가지고 있다면
+            startLocationUpdates(); // 위치 업데이트 실행
+            // 5초마다 위치 업데이트를 실행하기 위해 setInterval 함수 사용
+            Handler handler = new Handler();
+            int delay = 5000; // 5초
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    startLocationUpdates();
+                    handler.postDelayed(this, delay);
+                }
+            }, delay);
 
-        if(hasFineLocationPermission == PackageManager.PERMISSION_GRANTED && hasCoarseLocationPermission == PackageManager.PERMISSION_GRANTED){
-            // 2. 이미 퍼미션을 가지고 있다면
-            startLocationUpdates(); // 3. 위치 업데이트 실행
-        }else{
-            // 2. 퍼미션 요청을 허용한 적 없다면 퍼미션 요청하기
+        } else {
+            // 퍼미션 요청하기
             if (ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(), REQUIRED_PERMISSION[0])) {
                 Snackbar.make(requireView(), "이 앱을 실행하려면 위치 접근 권한이 필요합니다.", Snackbar.LENGTH_INDEFINITE).setAction("확인", new View.OnClickListener() {
                     @Override
@@ -157,7 +165,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
                 ActivityCompat.requestPermissions(requireActivity(), REQUIRED_PERMISSION, PERMISSION_REQUEST_CODE);
             }
         }
-
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
@@ -165,6 +172,54 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
                 Log.d(TAG, "onMapClick: ");
             }
         });
+        // Firebase 데이터베이스에서 다른 사용자의 위치 정보를 가져옴
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference usersRef = database.getReference("users");
+
+        usersRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                // 이전 마커들 제거
+                mMap.clear();
+
+                // 데이터베이스에서 위치 정보를 가져와서 처리
+                for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
+                    String emailID = userSnapshot.child("emailID").getValue(String.class);
+                    double latitude = userSnapshot.child("latitude").getValue(Double.class);
+                    double longitude = userSnapshot.child("longitude").getValue(Double.class);
+
+                    // 가져온 위치 정보를 마커로 표시
+                    LatLng userLatLng = new LatLng(latitude, longitude);
+                    MarkerOptions markerOptions = new MarkerOptions()
+                            .position(userLatLng)
+                            .title(emailID)
+                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.puppy));
+                    // 최신 위치에 대한 마커만 추가
+                    currentMarker = mMap.addMarker(markerOptions);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // 오류 처리
+                Log.e(TAG, "Failed to read user locations", databaseError.toException());
+            }
+        });
+        // 팝업 추가
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                if (marker.equals(currentMarker)) {
+                    showPopupDialog(); // 마커가 클릭되었을 때 팝업을 띄웁니다.
+                    return true;
+                }
+                return false;
+            }
+        });
+    }
+    private void showPopupDialog() {
+        PopupDialog popupDialog = new PopupDialog();
+        popupDialog.show(getChildFragmentManager(), "popup_dialog");
     }
 
     LocationCallback locationCallback = new LocationCallback() {
@@ -232,6 +287,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
 
         LatLng currentLatLng =  new LatLng(location.getLatitude(), location.getLongitude());
 
+
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
+        String uid = firebaseUser.getUid();
+
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(currentLatLng);
         markerOptions.title(markerTitle);
@@ -243,6 +303,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
 
         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(currentLatLng);
         mMap.moveCamera(cameraUpdate);
+
+        // 위도와 경도 값을 가져옵니다.
+        double latitude = location.getLatitude();
+        double longitude = location.getLongitude();
+
+        // 위도와 경도를 문자열로 변환합니다.
+        String latitudeString = String.valueOf(latitude);
+        String longitudeString = String.valueOf(longitude);
+
+        // Firebase에 위도와 경도를 저장합니다.
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference locationRef = database.getReference("users").child(uid);
+        locationRef.child("emailID").setValue(firebaseUser.getEmail());
+        locationRef.child("latitude").setValue(location.getLatitude());
+        locationRef.child("longitude").setValue(location.getLongitude());
+
     }
 
 
@@ -362,6 +438,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
         LatLng DEFAULT_LOCATION = new LatLng(100.56, 126.97);
         String markerTitle = "위치 정보 가져올 수 없음";
         String markerSnippet = "위치 퍼미션과 GPS 활성 여부를 확인하세요";
+
 
         if(currentMarker != null){
             currentMarker.remove();
