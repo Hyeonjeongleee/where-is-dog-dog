@@ -9,7 +9,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.view.LayoutInflater;
@@ -24,17 +23,15 @@ import com.example.myapplication.databinding.FragmentMyinfoBinding;
 public class MyinfoAfterLoginFragment extends Fragment {
 
     private FragmentMyinfoAfterLoginBinding binding;
+    private DogRegistrationFragment dogRegistrationFragment;
 
     @Override
-    public android.view.View onCreateView(
-            LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState
-    ) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentMyinfoAfterLoginBinding.inflate(inflater, container, false);
         return binding.getRoot();
-
     }
 
+    @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
@@ -53,12 +50,25 @@ public class MyinfoAfterLoginFragment extends Fragment {
             }
         });
 
+        Button btn_registerDog = view.findViewById(R.id.button_register_dog);
+        btn_registerDog.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dogRegistrationFragment = new DogRegistrationFragment();
+
+                // 반려견 정보 등록 프래그먼트로 이동
+                FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.main_frame, dogRegistrationFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
+            }
+        });
     }
+
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
     }
-
 }

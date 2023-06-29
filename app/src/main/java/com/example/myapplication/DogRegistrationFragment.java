@@ -20,24 +20,26 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class DogRegistrationFragment extends Fragment {
     private EditText editTextName;
     private EditText editTextBreed;
     private EditText editTextAge;
     private RadioGroup radioGroupGender;
-    private RadioButton radioButtonMale;
-    private RadioButton radioButtonFemale;
     private CheckBox checkBoxNeutered;
     private Button buttonRegister;
-    private FirebaseAuth mFirebaseAuth;      // 파이어베이스 인증 처리
-    private DatabaseReference mDatabaseRef;  // 실시간 데이터베이스 - 서버에 연동시킬 수 있는 객체
+    private Button buttonUpdate;
+    private FirebaseAuth mFirebaseAuth;
     private DatabaseReference dogReference;
-    private DatabaseReference userReference;
     private FirebaseUser currentUser;
-    private FirebaseUser mFirebaseUser;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -47,21 +49,14 @@ public class DogRegistrationFragment extends Fragment {
         editTextBreed = view.findViewById(R.id.editTextBreed);
         editTextAge = view.findViewById(R.id.editTextAge);
         radioGroupGender = view.findViewById(R.id.radioGroupGender);
-        radioButtonMale = view.findViewById(R.id.radioButtonMale);
-        radioButtonFemale = view.findViewById(R.id.radioButtonFemale);
         checkBoxNeutered = view.findViewById(R.id.checkBoxNeutered);
         buttonRegister = view.findViewById(R.id.buttonRegisterdog);
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         mFirebaseAuth = FirebaseAuth.getInstance();
-        mFirebaseUser = mFirebaseAuth.getCurrentUser();
+
         buttonRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-                FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
-                //String uid = firebaseUser.getUid();
-                String uid = MainActivity.userUid;
-                mFirebaseUser = mFirebaseAuth.getCurrentUser();
                 if (currentUser != null) {
                     registerDog();
                 } else {
@@ -69,7 +64,6 @@ public class DogRegistrationFragment extends Fragment {
                 }
             }
         });
-
         return view;
     }
 
@@ -101,7 +95,6 @@ public class DogRegistrationFragment extends Fragment {
                 dogReference = FirebaseDatabase.getInstance().getReference("users")
                         .child(currentUserUid)
                         .child("dogs");
-                FirebaseDatabase database = FirebaseDatabase.getInstance();
                 String dogId = dogReference.push().getKey();
                 Dog dog = new Dog(name, breed, age, gender, isNeutered);
 
@@ -112,6 +105,9 @@ public class DogRegistrationFragment extends Fragment {
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if (task.isSuccessful()) {
                                         showToast("반려견 정보 등록 완료");
+
+                                        // 이전 단계로 돌아가기 위해 Fragment를 스택에서 제거합니다.
+                                        requireActivity().getSupportFragmentManager().popBackStack();
                                     } else {
                                         showToast("반려견 정보 등록 실패");
                                     }

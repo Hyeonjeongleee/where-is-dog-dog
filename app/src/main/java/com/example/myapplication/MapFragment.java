@@ -249,8 +249,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
             public boolean onMarkerClick(Marker marker) {
                 currentMarker = marker; // 클릭한 마커를 currentMarker에 대입합니다.
 
-                if (marker.equals(currentMarker)) {
-                    // !marker.getTitle().equals(currentUserEmail)
+                if (!marker.getTitle().equals(currentUserEmail)) {
+                    // marker.equals(currentMarker) : 내 정보도 클릭해서 볼 수 있는 코드
                     showPopupDialog(); // 마커가 클릭되었을 때 팝업을 띄웁니다.
                     return true;
                 }
