@@ -39,7 +39,7 @@
         android:layout_margin="20dp"
         android:layout_marginBottom="224dp"
         android:text="등록"
-        android:backgroundTint="#328099"
+        android:backgroundTint="#5D9CCF"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"

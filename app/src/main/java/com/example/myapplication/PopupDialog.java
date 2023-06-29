@@ -31,6 +31,8 @@ public class PopupDialog extends DialogFragment {
     private String puppy_name;
     private String puppy_age;
     private String puppy_breed;
+    private String puppy_gender;
+    private String puppy_vaccin;
 
     private void showCustomDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
@@ -42,6 +44,9 @@ public class PopupDialog extends DialogFragment {
         TextView dogNameTextView = dialogView.findViewById(R.id.tv_dog_name);
         TextView dogAgeTextView = dialogView.findViewById(R.id.tv_dog_age);
         TextView dogBreedTextView = dialogView.findViewById(R.id.tv_dog_breed);
+        TextView dogGenderTextView = dialogView.findViewById(R.id.tv_dog_gender);
+        TextView dogVaccinatedTextView = dialogView.findViewById(R.id.tv_dog_vaccinated);
+
 
         dogPhotoImageView.setImageResource(R.drawable.dog_image);
 
@@ -61,8 +66,17 @@ public class PopupDialog extends DialogFragment {
                     Boolean vaccinated = dogSnapshot.child("vaccinated").getValue(Boolean.class);
                     if (age != null && breed != null && gender != null && name != null && vaccinated != null) {
                         puppy_name = name;
-                        puppy_age = age;
-                        puppy_breed = breed;
+                        puppy_age = "나이: " + age;
+                        puppy_breed = "견종: " + breed;
+                        puppy_gender = "성별: " + gender;
+                        if (vaccinated) puppy_vaccin = "백신 접종 완료";
+                        else puppy_vaccin = "백신 미접종";
+
+                        dogNameTextView.setText(puppy_name);
+                        dogAgeTextView.setText(puppy_age);
+                        dogBreedTextView.setText(puppy_breed);
+                        dogGenderTextView.setText(puppy_gender);
+                        dogVaccinatedTextView.setText(puppy_vaccin);
                     }
                 }
             }
@@ -73,11 +87,6 @@ public class PopupDialog extends DialogFragment {
                 Log.e(TAG, "Failed to read age value", databaseError.toException());
             }
         });
-
-        dogNameTextView.setText(puppy_name);
-        dogAgeTextView.setText(puppy_age);
-        dogBreedTextView.setText(puppy_breed);
-
 
         builder.setView(dialogView)
                 .setPositiveButton("확인", new DialogInterface.OnClickListener() {

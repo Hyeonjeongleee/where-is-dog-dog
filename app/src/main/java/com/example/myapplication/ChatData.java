@@ -7,6 +7,7 @@ public class ChatData {
 
     private String msg;
     private String nickname;
+    private boolean sentByMe;
 
     public String getMsg() {
         return msg;
@@ -22,5 +23,12 @@ public class ChatData {
 
     public void setNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    public boolean isSentByMe() {
+        return sentByMe;
+    }
+    public void setSentByMe(boolean sentByMe) {
+        this.sentByMe = sentByMe;
     }
 }

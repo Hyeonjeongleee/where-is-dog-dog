@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -9,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
-import android.content.Context;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
@@ -21,6 +21,7 @@ import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.ChildEventListener;
@@ -46,6 +47,7 @@ public class ChatFragment extends Fragment {
     private Button Button_send;
     private DatabaseReference myRef;
     private LinearLayout input_bar;
+    private TextView txtTitle;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -53,13 +55,16 @@ public class ChatFragment extends Fragment {
 
         Button_send = view.findViewById(R.id.Button_send);
         EditText_chat = view.findViewById(R.id.EditText_chat);
+        txtTitle = view.findViewById(R.id.txt_TItle);
 
         FirebaseApp.initializeApp(requireContext());
 
         FirebaseAuth auth = FirebaseAuth.getInstance();
         FirebaseUser user = auth.getCurrentUser();
         if (user != null) {
-            nick = user.getUid(); // 현재 사용자의 ID를 nick 변수에 할당합니다.
+            String[] emailParts = user.getEmail().split("@");
+            nick = emailParts[0]; // "@" 기호 이전 부분을 닉네임으로 설정합니다.
+
         } else {
             // 사용자가 로그인하지 않은 경우 처리할 내용
         }
@@ -73,11 +78,13 @@ public class ChatFragment extends Fragment {
                     ChatData chat = new ChatData();
                     chat.setNickname(nick);
                     chat.setMsg(msg);
+                    chat.setSentByMe(true); // 보낸 메시지인 경우 true로 설정
                     myRef.push().setValue(chat);
                     EditText_chat.setText("");
                 }
             }
         });
+
 
         mRecyclerView = view.findViewById(R.id.my_recycler_view);
         mRecyclerView.setHasFixedSize(true);
@@ -85,7 +92,7 @@ public class ChatFragment extends Fragment {
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         chatList = new ArrayList<>();
-        mAdapter = new ChatAdapter(chatList, requireContext(), nick);
+        mAdapter = new ChatAdapter(chatList, requireContext(), nick, txtTitle);
         mRecyclerView.setAdapter(mAdapter);
 
         // Write a message to the database
@@ -210,4 +217,11 @@ public class ChatFragment extends Fragment {
             }
         }, 200);
     }
+
+    public void onDestroy() {
+        super.onDestroy();
+        txtTitle.setVisibility(View.GONE);
+        // 또는 txtTitle.setText("");
+    }
+
 }
