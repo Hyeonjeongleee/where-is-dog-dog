@@ -206,30 +206,35 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
                 // 데이터베이스에서 위치 정보를 가져와서 처리
                 for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
                     String emailID = userSnapshot.child("emailID").getValue(String.class);
-                    double latitude = userSnapshot.child("latitude").getValue(Double.class);
-                    double longitude = userSnapshot.child("longitude").getValue(Double.class);
+                    Double latitudeObj = userSnapshot.child("latitude").getValue(Double.class);
+                    Double longitudeObj = userSnapshot.child("longitude").getValue(Double.class);
 
-                    // 가져온 위치 정보를 마커로 표시
-                    LatLng userLatLng = new LatLng(latitude, longitude);
-                    MarkerOptions markerOptions;
+                    if (emailID != null && latitudeObj != null && longitudeObj != null) {
+                        double latitude = latitudeObj.doubleValue();
+                        double longitude = longitudeObj.doubleValue();
 
-                    // 6.28추가 cj 마커 다르게
-                    if (emailID.equals(currentUserEmail)) {
-                        // 현재 사용자의 마커
-                        markerOptions = new MarkerOptions()
-                                .position(userLatLng)
-                                .title(emailID)
-                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.puppy));
-                    } else {
-                        // 다른 사용자의 마커
-                        markerOptions = new MarkerOptions()
-                                .position(userLatLng)
-                                .title(emailID)
-                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.puppy2));
+                        // 가져온 위치 정보를 마커로 표시
+                        LatLng userLatLng = new LatLng(latitude, longitude);
+                        MarkerOptions markerOptions;
+
+                        // 6.28추가 cj 마커 다르게
+                        if (emailID.equals(currentUserEmail)) {
+                            // 현재 사용자의 마커
+                            markerOptions = new MarkerOptions()
+                                    .position(userLatLng)
+                                    .title(emailID)
+                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.puppy));
+                        } else {
+                            // 다른 사용자의 마커
+                            markerOptions = new MarkerOptions()
+                                    .position(userLatLng)
+                                    .title(emailID)
+                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.puppy2));
+                        }
+
+                        // 마커 추가
+                        currentMarker = mMap.addMarker(markerOptions);
                     }
-
-                    // 마커 추가
-                    currentMarker = mMap.addMarker(markerOptions);
                 }
             }
 
