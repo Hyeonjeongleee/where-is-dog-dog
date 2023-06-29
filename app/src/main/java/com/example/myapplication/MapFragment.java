@@ -185,9 +185,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
             }
         });
 
+
         // Firebase 데이터베이스에서 다른 사용자의 위치 정보를 가져옴
         FirebaseDatabase database1 = FirebaseDatabase.getInstance();
         DatabaseReference usersRef = database1.getReference("users");
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        String currentUserEmail = currentUser != null ? currentUser.getEmail() : "";
 
         usersRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -207,11 +211,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
 
                     // 가져온 위치 정보를 마커로 표시
                     LatLng userLatLng = new LatLng(latitude, longitude);
-                    MarkerOptions markerOptions = new MarkerOptions()
-                            .position(userLatLng)
-                            .title(emailID)
-                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.puppy));
-                    // 최신 위치에 대한 마커만 추가
+                    MarkerOptions markerOptions;
+
+                    // 6.28추가 cj 마커 다르게
+                    if (emailID.equals(currentUserEmail)) {
+                        // 현재 사용자의 마커
+                        markerOptions = new MarkerOptions()
+                                .position(userLatLng)
+                                .title(emailID)
+                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.puppy));
+                    } else {
+                        // 다른 사용자의 마커
+                        markerOptions = new MarkerOptions()
+                                .position(userLatLng)
+                                .title(emailID)
+                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.puppy2));
+                    }
+
+                    // 마커 추가
                     currentMarker = mMap.addMarker(markerOptions);
                 }
             }
@@ -232,8 +249,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
             public boolean onMarkerClick(Marker marker) {
                 currentMarker = marker; // 클릭한 마커를 currentMarker에 대입합니다.
 
-                if (marker.equals(currentMarker)) {
-                    showPopupDialog(); // 마커가 클릭되었을 때 팝업을 띄웁니다.
+                if (!marker.getTitle().equals(currentUserEmail)) {
+                    showPopupDialog(); // 다른 유저의 마커가 클릭되었을 때 팝업을 띄웁니다. cj 6/29
                     return true;
                 }
                 return false;

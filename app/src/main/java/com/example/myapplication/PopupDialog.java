@@ -26,7 +26,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class PopupDialog extends DialogFragment {
+    private static final String TAG = "popUp";
     private int count = 0;
+    private String puppy_name;
+    private String puppy_age;
+    private String puppy_breed;
 
     private void showCustomDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
@@ -40,9 +44,39 @@ public class PopupDialog extends DialogFragment {
         TextView dogBreedTextView = dialogView.findViewById(R.id.tv_dog_breed);
 
         dogPhotoImageView.setImageResource(R.drawable.dog_image);
-        dogNameTextView.setText("반려견 이름");
-        dogAgeTextView.setText("반려견 나이");
-        dogBreedTextView.setText("반려견 종류");
+
+        // 반려견 정보 받아오기
+        String userUid = MainActivity.userUid;
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference usersRef = database.getReference("users").child(userUid).child("dogs");
+
+        usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot dogSnapshot : dataSnapshot.getChildren()) {
+                    String age = dogSnapshot.child("age").getValue(String.class);
+                    String breed = dogSnapshot.child("breed").getValue(String.class);
+                    String gender = dogSnapshot.child("gender").getValue(String.class);
+                    String name = dogSnapshot.child("name").getValue(String.class);
+                    Boolean vaccinated = dogSnapshot.child("vaccinated").getValue(Boolean.class);
+                    if (age != null && breed != null && gender != null && name != null && vaccinated != null) {
+                        puppy_name = name;
+                        puppy_age = age;
+                        puppy_breed = breed;
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // 오류 처리
+                Log.e(TAG, "Failed to read age value", databaseError.toException());
+            }
+        });
+
+        dogNameTextView.setText(puppy_name);
+        dogAgeTextView.setText(puppy_age);
+        dogBreedTextView.setText(puppy_breed);
 
 
         builder.setView(dialogView)

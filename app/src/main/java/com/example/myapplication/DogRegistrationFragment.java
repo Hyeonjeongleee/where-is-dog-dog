@@ -41,7 +41,7 @@ public class DogRegistrationFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_dogregistration, container, false);
+        View view = inflater.inflate(R.layout.activity_dogregister, container, false);
 
         editTextName = view.findViewById(R.id.editTextName);
         editTextBreed = view.findViewById(R.id.editTextBreed);
