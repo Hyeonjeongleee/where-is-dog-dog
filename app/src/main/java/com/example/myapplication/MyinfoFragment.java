@@ -40,7 +40,7 @@ public class MyinfoFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         //test용 코드 추가
-        infoText = view.findViewById(R.id.infoText);
+//        infoText = view.findViewById(R.id.infoText);
 
         Button btn_login = view.findViewById(R.id.button_login); // 버튼을 findViewById로 찾습니다.
 
@@ -69,8 +69,8 @@ public class MyinfoFragment extends Fragment {
             result -> {
                 //Login Activity를 수행하고 돌아왔을때 결과 값을 받아 올 수 있는 통로
                 if (result.getResultCode() == RESULT_OK) {
-                    // 로그인 성공 시 유저 정보를 전달받음.
-                    infoText.setText(result.getData().getStringExtra("value"));
+                    // 로그인 성공 시 유저 정보를 전달받음.(test) -> LoginActivity에서 자체적으로 usdUid 변수에 값 줌
+//                    infoText.setText(result.getData().getStringExtra("value"));
 
                     // 다른 프래그먼트로 이동
                     FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();

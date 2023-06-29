@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -25,6 +26,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class PopupDialog extends DialogFragment {
+    private int count = 0;
 
     private void showCustomDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
@@ -79,11 +81,10 @@ public class PopupDialog extends DialogFragment {
                         String markerId = "마커의 ID"; // 실제로 사용되는 마커의 ID를 여기에 지정하십시오.
                         DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("whereIsDog")
                                 .child("UserAccount").child(markerId);
-
                         userRef.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                if (getActivity() != null) {
+                                if (getContext() != null) {
                                     // 컨텍스트가 null이 아닌 경우에만 실행
                                     if (dataSnapshot.exists()) {
                                         UserAccount userAccount = dataSnapshot.getValue(UserAccount.class);
@@ -94,7 +95,7 @@ public class PopupDialog extends DialogFragment {
                                                     "Password: " + userAccount.getPassword();
 
                                             // 다이얼로그 생성 및 표시
-                                            AlertDialog.Builder infoDialogBuilder = new AlertDialog.Builder(getActivity());
+                                            AlertDialog.Builder infoDialogBuilder = new AlertDialog.Builder(getContext());
                                             infoDialogBuilder.setTitle("사용자 정보")
                                                     .setMessage(userInfo)
                                                     .setPositiveButton("확인", new DialogInterface.OnClickListener() {
@@ -108,20 +109,18 @@ public class PopupDialog extends DialogFragment {
                                         }
                                     } else {
                                         // 해당 마커에 연결된 사용자 정보가 없음을 나타내는 처리
-                                        Toast.makeText(getActivity(), "해당 마커에 연결된 사용자 정보가 없습니다.", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(getContext(), "해당 마커에 연결된 사용자 정보가 없습니다.", Toast.LENGTH_SHORT).show();
                                     }
                                 }
                             }
-
                             @Override
                             public void onCancelled(@NonNull DatabaseError databaseError) {
                                 // 데이터베이스 조회 오류 처리
-                                Toast.makeText(getActivity(), "데이터베이스 조회 오류: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getContext(), "데이터베이스 조회 오류: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
                             }
                         });
                     }
                 });
-
         return builder.create();
     }
 

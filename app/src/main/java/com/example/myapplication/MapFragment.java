@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -20,12 +21,10 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-import com.example.myapplication.databinding.FragmentFirstBinding;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -67,7 +66,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
 
     // OnRequestPermissionsResultCallback에서 수신된 결과에서 ActivityCompat.OnRequestPermissionsResultCallback를 사용한 퍼미션 요청을 구별하기 위함
     private static final int PERMISSION_REQUEST_CODE = 100;
-    boolean needRequest = false;
 
     // 앱을 실행하기 위해 필요한 퍼미션 정의
     String[] REQUIRED_PERMISSION = {Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION };
@@ -78,8 +76,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
     private FusedLocationProviderClient mFusedLocationClient;
     private LocationRequest locationRequest; // 주의
     private Location location;
-
-    private View mLayout; // snackbar 사용하기 위함.
 
     //GPT _ Fragment로 전환중 추가한 코드
     @Override
@@ -95,7 +91,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
         builder.addLocationRequest(locationRequest);
 
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext());
 
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager()
                 .findFragmentById(R.id.map);
@@ -128,6 +124,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
 //    }
 
     public void onMapReady(@NonNull GoogleMap googleMap) {
+        Activity activity = getActivity();
+        if (activity == null) {
+            return; // 액티비티가 없는 경우, 작업을 중단하고 리턴합니다.
+        }
         Log.d(TAG, "onMapReady: 들어옴 ");
         mMap = googleMap;
 
@@ -147,6 +147,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
+                    Activity activity = getActivity();
+                    if (activity == null) {
+                        return; // 액티비티가 없는 경우, 작업을 중단하고 리턴합니다.
+                    }
                     startLocationUpdates();
                     handler.postDelayed(this, delay);
                 }
@@ -158,6 +162,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
                 Snackbar.make(requireView(), "이 앱을 실행하려면 위치 접근 권한이 필요합니다.", Snackbar.LENGTH_INDEFINITE).setAction("확인", new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        Activity activity = getActivity();
+                        if (activity == null) {
+                            return; // 액티비티가 없는 경우, 작업을 중단하고 리턴합니다.
+                        }
                         ActivityCompat.requestPermissions(requireActivity(), REQUIRED_PERMISSION, PERMISSION_REQUEST_CODE);
                     }
                 }).show();
@@ -169,16 +177,25 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(@NonNull LatLng latLng) {
+                Activity activity = getActivity();
+                if (activity == null) {
+                    return; // 액티비티가 없는 경우, 작업을 중단하고 리턴합니다.
+                }
                 Log.d(TAG, "onMapClick: ");
             }
         });
+
         // Firebase 데이터베이스에서 다른 사용자의 위치 정보를 가져옴
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference usersRef = database.getReference("users");
+        FirebaseDatabase database1 = FirebaseDatabase.getInstance();
+        DatabaseReference usersRef = database1.getReference("users");
 
         usersRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Activity activity = getActivity();
+                if (activity == null) {
+                    return; // 액티비티가 없는 경우, 작업을 중단하고 리턴합니다.
+                }
                 // 이전 마커들 제거
                 mMap.clear();
 
@@ -201,6 +218,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
+                Activity activity = getActivity();
+                if (activity == null) {
+                    return; // 액티비티가 없는 경우, 작업을 중단하고 리턴합니다.
+                }
                 // 오류 처리
                 Log.e(TAG, "Failed to read user locations", databaseError.toException());
             }
@@ -233,29 +254,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
 
             if(locationList.size() > 0){
                 location = locationList.get(locationList.size() -1);
-
                 currentPosition = new LatLng(location.getLatitude(), location.getLongitude());
-
                 String markerTitle = getCurrentAddress(currentPosition);
                 String markerSnippet = "위도 :" + String.valueOf(location.getLatitude()) + "경도 :" +
                         String.valueOf(location.getLongitude());
-
                 // 현재 위치에 마커 생성하고 이동
                 setCurrentLocation(location, markerTitle, markerSnippet);
-
                 mCurrentLocation = location;
             }
         }
     };
 
-
     private String getCurrentAddress(LatLng currentPosition) {
         // 지오코더 gps를 주소로 변환
-
         Geocoder geocoder = new Geocoder(requireContext(), Locale.getDefault());
 
         List<Address> addresses;
-
         try{
             addresses = geocoder.getFromLocation(
                     currentPosition.latitude,
@@ -281,6 +295,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
     }
 
     private void setCurrentLocation(Location location, String markerTitle, String markerSnippet) {
+        Activity activity = getActivity();
+        if (activity == null) {
+            return; // 액티비티가 없는 경우, 작업을 중단하고 리턴합니다.
+        }
 
         if(currentMarker != null)
         {
@@ -289,10 +307,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
 
         LatLng currentLatLng =  new LatLng(location.getLatitude(), location.getLongitude());
 
-
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
-        String uid = firebaseUser.getUid();
+        String uid = MainActivity.userUid;
 
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(currentLatLng);
@@ -315,8 +332,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
         String longitudeString = String.valueOf(longitude);
 
         // Firebase에 위도와 경도를 저장합니다.
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference locationRef = database.getReference("users").child(uid);
+        FirebaseDatabase database2 = FirebaseDatabase.getInstance();
+        DatabaseReference locationRef = database2.getReference("users").child(uid);
         locationRef.child("emailID").setValue(firebaseUser.getEmail());
         locationRef.child("latitude").setValue(location.getLatitude());
         locationRef.child("longitude").setValue(location.getLongitude());
@@ -326,6 +343,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
 
 
     private void startLocationUpdates() {
+        Activity activity = getActivity();
+        if (activity == null) {
+            return; // 액티비티가 없는 경우, 작업을 중단하고 리턴합니다.
+        }
+
         if(!checkLocationServicesStatus()){
             showDiologForLocationServiceSetting();
 
@@ -349,8 +371,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
 
     @Override
     public void onStart() {
-        super.onStart();
+        Activity activity = getActivity();
+        if (activity == null) {
+            return; // 액티비티가 없는 경우, 작업을 중단하고 리턴합니다.
+        }
 
+        super.onStart();
         Log.d(TAG, "onStart: ");
 
         if(checkPermission()){
@@ -364,6 +390,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
 
     @Override
     public void onStop() {
+        Activity activity = getActivity();
+        if (activity == null) {
+            return; // 액티비티가 없는 경우, 작업을 중단하고 리턴합니다.
+        }
+
         super.onStop();
 
         if(mFusedLocationClient != null){
@@ -372,7 +403,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
     }
 
     private boolean checkPermission(){
-
         int hasFineLocationPermission = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION);
         int hasCoarseLocationPermission = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION);
 
@@ -387,6 +417,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
     }
 
     private void showDiologForLocationServiceSetting() {
+        Activity activity = getActivity();
+        if (activity == null) {
+            return; // 액티비티가 없는 경우, 작업을 중단하고 리턴합니다.
+        }
+
         LocationManager locationManager = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
         if (locationManager != null && !locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             // 위치 서비스가 비활성화된 경우
@@ -412,6 +447,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
     }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        Activity activity = getActivity();
+        if (activity == null) {
+            return; // 액티비티가 없는 경우, 작업을 중단하고 리턴합니다.
+        }
+
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         switch (requestCode) {
@@ -435,6 +475,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
     }
 
     private void setDefaultLocation() {
+        Activity activity = getActivity();
+        if (activity == null) {
+            return; // 액티비티가 없는 경우, 작업을 중단하고 리턴합니다.
+        }
 
         // 기본 위치
         LatLng DEFAULT_LOCATION = new LatLng(100.56, 126.97);

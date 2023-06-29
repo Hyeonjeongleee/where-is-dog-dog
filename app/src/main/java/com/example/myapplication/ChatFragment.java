@@ -6,13 +6,21 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
+import android.content.Context;
+import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.ChildEventListener;
@@ -37,6 +45,7 @@ public class ChatFragment extends Fragment {
     private EditText EditText_chat;
     private Button Button_send;
     private DatabaseReference myRef;
+    private LinearLayout input_bar;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -90,6 +99,7 @@ public class ChatFragment extends Fragment {
                 Log.d("CHATCHAT", dataSnapshot.getValue().toString());
                 ChatData chat = dataSnapshot.getValue(ChatData.class);
                 ((ChatAdapter) mAdapter).addChat(chat);
+                scrollToBottom(); // 가장 하단으로 스크롤
 
             }
 
@@ -114,5 +124,90 @@ public class ChatFragment extends Fragment {
             }
         });
         return view;
+    }
+
+    private ViewTreeObserver.OnGlobalLayoutListener keyboardLayoutListener = new ViewTreeObserver.OnGlobalLayoutListener() {
+        private int previousHeight = 0;
+        private boolean isKeyboardShowing = true;
+
+        @Override
+        public void onGlobalLayout() {
+            Rect rect = new Rect();
+            mRecyclerView.getWindowVisibleDisplayFrame(rect);
+            int screenHeight = mRecyclerView.getRootView().getHeight();
+            int keyboardHeight = Math.abs(rect.bottom - rect.top); // 키보드의 높이
+
+            if (keyboardHeight > 0) { // 키보드가 올라온 경우
+                if (!isKeyboardShowing) {
+                    isKeyboardShowing = true;
+                    inputBarAnimate(true); // input_bar를 위로 올리는 애니메이션 시작
+                }
+            } else {
+                if (isKeyboardShowing) {
+                    isKeyboardShowing = false;
+                    // 키보드가 내려가면 하단바 보이기
+                    inputBarAnimate(false); // input_bar를 원래 위치로 돌리는 애니메이션 시작
+                }
+            }
+
+            previousHeight = keyboardHeight;
+        }
+    };
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        input_bar = view.findViewById(R.id.input_bar);
+        EditText_chat.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    inputBarAnimate(true); // input_bar를 위로 올리는 애니메이션 시작
+                } else {
+                    // 키보드가 내려가면 하단바 보이기
+                    inputBarAnimate(false); // input_bar를 원래 위치로 돌리는 애니메이션 시작
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            EditText_chat.getViewTreeObserver().removeOnGlobalLayoutListener(keyboardLayoutListener);
+        }
+    }
+
+    private void inputBarAnimate(boolean up) {
+        float translationY = up ? -inputBarHeight() : 0; // up이 true일 때는 위로 올리고, false일 때는 원래 위치로 돌립니다.
+        ObjectAnimator animator = ObjectAnimator.ofFloat(input_bar, "translationY", translationY);
+        animator.setDuration(100); // 애니메이션의 지속 시간을 설정합니다.
+
+        // 키보드가 사라지고 애니메이션이 완료된 후에 원래 위치로 돌려줍니다.
+        if (!up) {
+            animator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    input_bar.setTranslationY(0);
+                }
+            });
+        }
+
+        animator.start();
+    }
+
+    private int inputBarHeight() {
+        return input_bar.getHeight();
+    }
+
+    private void scrollToBottom() {
+        mRecyclerView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mRecyclerView.smoothScrollToPosition(mAdapter.getItemCount() - 1);
+            }
+        }, 200);
     }
 }

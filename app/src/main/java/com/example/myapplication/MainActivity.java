@@ -12,6 +12,8 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Toast;
 
 import com.example.myapplication.databinding.ActivityMainBinding;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -41,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     private MyinfoFragment myinfoFragment;
     private MyinfoAfterLoginFragment myinfoAfterLoginFragment;
     private RequestLoginFragment requestLoginFragment;
+    private ChatListFragment chatListFragment;
 
     // 실시간 위치용 코드
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 100;
@@ -94,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
         myinfoFragment = new MyinfoFragment();
         myinfoAfterLoginFragment = new MyinfoAfterLoginFragment();
         requestLoginFragment = new RequestLoginFragment();
+        chatListFragment = new ChatListFragment();
         setFrag(0);  // 첫 프래그먼트 화면 지정
     }
 
@@ -108,21 +112,26 @@ public class MainActivity extends AppCompatActivity {
                 ft.commit();  // 저장을 의미
                 break;
             case 1:
-                if (userUid == null) ft.replace(R.id.main_frame, requestLoginFragment);
-                else ft.replace(R.id.main_frame, mapFragment);
+                if (userUid == null)
+                    ft.replace(R.id.main_frame, requestLoginFragment);
+                else
+                    ft.replace(R.id.main_frame, mapFragment);
                 ft.commit();
                 break;
             case 2:
-                if (userUid == null) ft.replace(R.id.main_frame, requestLoginFragment);
-                else ft.replace(R.id.main_frame, chatFragment);
+                if (userUid == null)
+                    ft.replace(R.id.main_frame, requestLoginFragment);
+                else
+                    ft.replace(R.id.main_frame, chatListFragment);
                 ft.commit();
                 break;
             case 3:
-                if (userUid == null) ft.replace(R.id.main_frame, myinfoFragment);
-                else ft.replace(R.id.main_frame, myinfoAfterLoginFragment);
+                if (userUid == null)
+                    ft.replace(R.id.main_frame, myinfoFragment);
+                else
+                    ft.replace(R.id.main_frame, myinfoAfterLoginFragment);
                 ft.commit();
                 break;
-
         }
     }
 
@@ -168,7 +177,8 @@ public class MainActivity extends AppCompatActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startLocationUpdates();
             } else {
-                // 위치 권한이 거부되었을 때 처리할 작업
+                // 위치 권한이 거부된 경우 처리
+                Toast.makeText(this, "위치 권한이 거부되었습니다.", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -180,4 +190,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void hideBottomNavigationView() {
+        bottomNavigationView.setVisibility(View.GONE);
+    } // 하단바 사라지는 기능
+
+    public void showBottomNavigationView() {
+        bottomNavigationView.setVisibility(View.VISIBLE);
+    }
 }
