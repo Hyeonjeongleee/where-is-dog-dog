@@ -192,6 +192,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         String currentUserEmail = currentUser != null ? currentUser.getEmail() : "";
+        String currentUserUid = currentUser != null ? currentUser.getUid() : "";
 
         usersRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -205,6 +206,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
 
                 // 데이터베이스에서 위치 정보를 가져와서 처리
                 for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
+                    String userUid = userSnapshot.getKey();
                     String emailID = userSnapshot.child("emailID").getValue(String.class);
                     Double latitudeObj = userSnapshot.child("latitude").getValue(Double.class);
                     Double longitudeObj = userSnapshot.child("longitude").getValue(Double.class);
@@ -222,13 +224,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
                             // 현재 사용자의 마커
                             markerOptions = new MarkerOptions()
                                     .position(userLatLng)
-                                    .title(emailID)
+                                    .title(userUid)
                                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.puppy));
                         } else {
                             // 다른 사용자의 마커
                             markerOptions = new MarkerOptions()
                                     .position(userLatLng)
-                                    .title(emailID)
+                                    .title(userUid)
                                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.puppy2));
                         }
 
@@ -254,17 +256,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
             public boolean onMarkerClick(Marker marker) {
                 currentMarker = marker; // 클릭한 마커를 currentMarker에 대입합니다.
 
-                if (!marker.getTitle().equals(currentUserEmail)) {
+                if (!marker.getTitle().equals(currentUserUid)) {
                     // marker.equals(currentMarker) : 내 정보도 클릭해서 볼 수 있는 코드
-                    showPopupDialog(); // 마커가 클릭되었을 때 팝업을 띄웁니다.
+                    showPopupDialog(marker.getTitle()); // 마커가 클릭되었을 때 팝업을 띄웁니다.
                     return true;
                 }
                 return false;
             }
         });
     }
-    private void showPopupDialog() {
-        PopupDialog popupDialog = new PopupDialog();
+    private void showPopupDialog(String markerId) {
+        PopupDialog popupDialog = new PopupDialog(markerId);
         popupDialog.show(getChildFragmentManager(), "popup_dialog");
     }
 

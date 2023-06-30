@@ -27,12 +27,18 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class PopupDialog extends DialogFragment {
     private static final String TAG = "popUp";
+    private String markerId;
     private int count = 0;
     private String puppy_name;
     private String puppy_age;
     private String puppy_breed;
     private String puppy_gender;
     private String puppy_vaccin;
+
+
+    public PopupDialog(String markerId) {
+        this.markerId = markerId;
+    }
 
     private void showCustomDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
@@ -51,7 +57,7 @@ public class PopupDialog extends DialogFragment {
         dogPhotoImageView.setImageResource(R.drawable.dog_image);
 
         // 반려견 정보 받아오기
-        String userUid = MainActivity.userUid;
+        String userUid = markerId;
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference usersRef = database.getReference("users").child(userUid).child("dogs");
 
@@ -113,6 +119,7 @@ public class PopupDialog extends DialogFragment {
                     public void onClick(DialogInterface dialogInterface, int i) {
                         // "콕찌르기" 버튼이 클릭되었을 때 수행할 동작
                         // TODO: 콕찌르기 동작 구현
+
                         Toast.makeText(requireContext(), "콕 찔렀다멍!", Toast.LENGTH_SHORT).show();
                     }
                 })

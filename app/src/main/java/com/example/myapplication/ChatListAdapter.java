@@ -5,6 +5,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import com.example.myapplication.Chat;
+
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,10 +16,10 @@ import java.util.List;
 public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHolder> {
 
     private Context context;
-    private List<String> chatList;
+    private List<Chat> chatList;
     private OnItemClickListener listener;
 
-    public ChatListAdapter(Context context, List<String> chatList) {
+    public ChatListAdapter(Context context, List<Chat> chatList) {
         this.context = context;
         this.chatList = chatList;
     }
@@ -39,7 +41,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        String chatItem = chatList.get(position);
+        Chat chatItem = chatList.get(position);
         holder.bind(chatItem, listener);
     }
 
@@ -51,10 +53,12 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         private TextView chatNameTextView;
+        private TextView chatNicknameTextView;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             chatNameTextView = itemView.findViewById(R.id.chat_name_text_view);
+            chatNicknameTextView = itemView.findViewById(R.id.chat_nickname_text_view);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -69,8 +73,11 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
             });
         }
 
-        public void bind(String chatItem, OnItemClickListener listener) {
-            chatNameTextView.setText(chatItem);
+        public void bind(Chat chatItem, OnItemClickListener listener) {
+            chatNameTextView.setText(chatItem.getChatName());
+            chatNicknameTextView.setText(chatItem.getNickname());
+            chatNicknameTextView.setTextColor(context.getColor(android.R.color.black));
         }
+
     }
 }

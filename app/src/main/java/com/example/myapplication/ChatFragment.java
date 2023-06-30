@@ -6,6 +6,8 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.example.myapplication.Chat;
+
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -41,7 +43,7 @@ public class ChatFragment extends Fragment {
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private List<ChatData> chatList;
-    private String nick = "nick1";
+    private String nick;
 
     private EditText EditText_chat;
     private Button Button_send;
@@ -74,16 +76,17 @@ public class ChatFragment extends Fragment {
             public void onClick(View v) {
                 String msg = EditText_chat.getText().toString();
 
-                if (msg != null) {
+                if (!msg.isEmpty()) {
                     ChatData chat = new ChatData();
                     chat.setNickname(nick);
                     chat.setMsg(msg);
-                    chat.setSentByMe(true); // 보낸 메시지인 경우 true로 설정
+                    chat.setSentByMe(true); // 내가 보낸 메시지인 경우 true로 설정
                     myRef.push().setValue(chat);
                     EditText_chat.setText("");
                 }
             }
         });
+
 
 
         mRecyclerView = view.findViewById(R.id.my_recycler_view);
@@ -105,6 +108,14 @@ public class ChatFragment extends Fragment {
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
                 Log.d("CHATCHAT", dataSnapshot.getValue().toString());
                 ChatData chat = dataSnapshot.getValue(ChatData.class);
+
+                // 현재 사용자의 닉네임과 받아온 채팅 데이터의 닉네임 비교
+                if (chat.getNickname().equals(nick)) {
+                    chat.setSentByMe(true); // 내가 보낸 메시지인 경우 true로 설정
+                } else {
+                    chat.setSentByMe(false); // 상대방이 보낸 메시지인 경우 false로 설정
+                }
+
                 ((ChatAdapter) mAdapter).addChat(chat);
                 scrollToBottom(); // 가장 하단으로 스크롤
 

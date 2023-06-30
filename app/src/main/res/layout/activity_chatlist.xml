@@ -4,12 +4,10 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <TextView
+    <ImageView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="채팅목록"
-        android:textSize="25sp"
-        android:padding="16dp"/>
+        android:src="@drawable/chatlist" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/chat_recyclerView"

@@ -31,4 +31,5 @@ public class ChatData {
     public void setSentByMe(boolean sentByMe) {
         this.sentByMe = sentByMe;
     }
+
 }
