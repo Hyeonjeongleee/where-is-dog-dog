@@ -14,7 +14,8 @@
         android:src="@drawable/dog_image"
         android:scaleType="centerCrop"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="16dp"
+        android:layout_marginTop="16dp"/>
 
     <TextView
         android:id="@+id/tv_dog_name"

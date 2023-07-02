@@ -44,6 +44,7 @@ public class ChatFragment extends Fragment {
     private RecyclerView.LayoutManager mLayoutManager;
     private List<ChatData> chatList;
     private String nick;
+    public String matchedUserUid;
 
     private EditText EditText_chat;
     private Button Button_send;
@@ -88,7 +89,6 @@ public class ChatFragment extends Fragment {
         });
 
 
-
         mRecyclerView = view.findViewById(R.id.my_recycler_view);
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(requireContext());
@@ -100,7 +100,13 @@ public class ChatFragment extends Fragment {
 
         // Write a message to the database
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        myRef = database.getReference("message");
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        String currentUserUid = currentUser.getUid();
+        String receiverUid = "상대 사용자의 uid"; // 상대 사용자의 uid를 지정해야 합니다.
+        myRef = FirebaseDatabase.getInstance().getReference("users")
+                .child(currentUserUid)
+                .child("messages")
+                .child(receiverUid);
 
 
         myRef.addChildEventListener(new ChildEventListener() {

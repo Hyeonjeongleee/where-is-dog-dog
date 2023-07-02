@@ -15,6 +15,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -38,14 +40,16 @@ public class PopupDialog extends DialogFragment {
 
     public PopupDialog(String markerId) {
         this.markerId = markerId;
+        MainActivity.kokUserUid = markerId;
     }
 
-    private void showCustomDialog() {
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.popup_dialog_user, null);
 
-        AlertDialog customDialog = builder.setView(dialogView).create();
         ImageView dogPhotoImageView = dialogView.findViewById(R.id.iv_dog_photo);
         TextView dogNameTextView = dialogView.findViewById(R.id.tv_dog_name);
         TextView dogAgeTextView = dialogView.findViewById(R.id.tv_dog_age);
@@ -95,83 +99,74 @@ public class PopupDialog extends DialogFragment {
         });
 
         builder.setView(dialogView)
-                .setPositiveButton("확인", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        // 필요한 경우 "확인" 버튼 클릭을 처리하세요.
-                    }
-                })
-                .create()
-                .show();
-    }
-
-
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        LayoutInflater inflater = requireActivity().getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.popup_dialog, null);
-
-        builder.setView(dialogView)
                 .setPositiveButton("콕찌르기", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         // "콕찌르기" 버튼이 클릭되었을 때 수행할 동작
                         // TODO: 콕찌르기 동작 구현
+                        String markerId = MainActivity.kokUserUid;
+
+                        FirebaseDatabase database = FirebaseDatabase.getInstance();
+                        DatabaseReference myRef = database.getReference("users")
+                                        .child(markerId)
+                                        .child("alarm");
+
+                        String myId = MainActivity.userUid;
+                        myRef.child(myId).setValue(myId);
 
                         Toast.makeText(requireContext(), "콕 찔렀다멍!", Toast.LENGTH_SHORT).show();
                     }
                 })
-                .setNegativeButton("반려견 정보", new DialogInterface.OnClickListener() {
+                .setNegativeButton("확인", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        // 마커와 연관된 사용자 정보 가져오기
-                        showCustomDialog();
-                        String markerId = "마커의 ID"; // 실제로 사용되는 마커의 ID를 여기에 지정하십시오.
-                        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("whereIsDog")
-                                .child("UserAccount").child(markerId);
-                        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                if (getContext() != null) {
-                                    // 컨텍스트가 null이 아닌 경우에만 실행
-                                    if (dataSnapshot.exists()) {
-                                        UserAccount userAccount = dataSnapshot.getValue(UserAccount.class);
-                                        if (userAccount != null) {
-                                            final String userInfo = "사용자 정보:\n" +
-                                                    "ID: " + userAccount.getIdToken() + "\n" +
-                                                    "Email: " + userAccount.getEmailId() + "\n" +
-                                                    "Password: " + userAccount.getPassword();
-
-                                            // 다이얼로그 생성 및 표시
-                                            AlertDialog.Builder infoDialogBuilder = new AlertDialog.Builder(getContext());
-                                            infoDialogBuilder.setTitle("사용자 정보")
-                                                    .setMessage(userInfo)
-                                                    .setPositiveButton("확인", new DialogInterface.OnClickListener() {
-                                                        @Override
-                                                        public void onClick(DialogInterface dialogInterface, int i) {
-                                                            // 필요한 경우 "확인" 버튼 클릭을 처리하세요.
-                                                        }
-                                                    })
-                                                    .create()
-                                                    .show();
-                                        }
-                                    } else {
-                                        // 해당 마커에 연결된 사용자 정보가 없음을 나타내는 처리
-                                        Toast.makeText(getContext(), "해당 마커에 연결된 사용자 정보가 없습니다.", Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-                            }
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
-                                // 데이터베이스 조회 오류 처리
-                                Toast.makeText(getContext(), "데이터베이스 조회 오류: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
-                            }
-                        });
+                        // 필요한 경우 "확인" 버튼 클릭을 처리하세요.
                     }
                 });
         return builder.create();
     }
-
 }
+
+
+//        String markerId = "마커의 ID"; // 실제로 사용되는 마커의 ID를 여기에 지정하십시오.
+//        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("whereIsDog")
+//                .child("UserAccount").child(markerId);
+//        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                if (getContext() != null) {
+//                    // 컨텍스트가 null이 아닌 경우에만 실행
+//                    if (dataSnapshot.exists()) {
+//                        UserAccount userAccount = dataSnapshot.getValue(UserAccount.class);
+//                        if (userAccount != null) {
+//                            final String userInfo = "사용자 정보:\n" +
+//                                    "ID: " + userAccount.getIdToken() + "\n" +
+//                                    "Email: " + userAccount.getEmailId() + "\n" +
+//                                    "Password: " + userAccount.getPassword();
+//
+//                            // 다이얼로그 생성 및 표시
+//                            AlertDialog.Builder infoDialogBuilder = new AlertDialog.Builder(getContext());
+//                            infoDialogBuilder.setTitle("사용자 정보")
+//                                    .setMessage(userInfo)
+//                                    .setPositiveButton("확인", new DialogInterface.OnClickListener() {
+//                                        @Override
+//                                        public void onClick(DialogInterface dialogInterface, int i) {
+//                                            // 필요한 경우 "확인" 버튼 클릭을 처리하세요.
+//                                        }
+//                                    })
+//                                    .create()
+//                                    .show();
+//                        }
+//                    } else {
+//                        // 해당 마커에 연결된 사용자 정보가 없음을 나타내는 처리
+//                        Toast.makeText(getContext(), "해당 마커에 연결된 사용자 정보가 없습니다.", Toast.LENGTH_SHORT).show();
+//                    }
+//                }
+//            }
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError databaseError) {
+//                // 데이터베이스 조회 오류 처리
+//                Toast.makeText(getContext(), "데이터베이스 조회 오류: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+//            }
+//        });
+//

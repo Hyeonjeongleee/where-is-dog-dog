@@ -31,8 +31,8 @@ import com.google.firebase.auth.GetTokenResult;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static String userUid;
-    // 메인에서 가지고 다닐 userAccount 변수 선언
+    public static String userUid;  // 메인에서 가지고 다닐 내 uid
+    public static String kokUserUid;  // 메인에서 가지고 다닐 상대방 uid
 
     private BottomNavigationView bottomNavigationView;
     private FragmentManager fm;
