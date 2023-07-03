@@ -18,12 +18,12 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.myapplication.databinding.FragmentMyinfoAfterLoginBinding;
-import com.example.myapplication.databinding.FragmentMyinfoBinding;
 
 public class MyinfoAfterLoginFragment extends Fragment {
 
     private FragmentMyinfoAfterLoginBinding binding;
     private DogRegistrationFragment dogRegistrationFragment;
+    private DogModifyFragment dogModifyFragment;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -40,13 +40,12 @@ public class MyinfoAfterLoginFragment extends Fragment {
         btn_logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                MainActivity.userUid = null;
-
-                // 다른 프래그먼트로 이동
-                FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.main_frame, new MyinfoFragment());
-                transaction.addToBackStack(null); // 이전 프래그먼트로 돌아가기 위해 back stack에 추가
-                transaction.commit();
+                MainActivity activity = (MainActivity) getActivity();
+                if (activity != null) {
+                    activity.userUid = null;
+                    Intent intent = new Intent(activity, LoginActivity.class);
+                    startActivity(intent);
+                }
             }
         });
 
@@ -59,6 +58,20 @@ public class MyinfoAfterLoginFragment extends Fragment {
                 // 반려견 정보 등록 프래그먼트로 이동
                 FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
                 transaction.replace(R.id.main_frame, dogRegistrationFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
+            }
+        });
+
+        Button btn_editDog = view.findViewById(R.id.button_edit_dog);
+        btn_editDog.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dogModifyFragment = new DogModifyFragment();
+
+                // 반려견 정보 등록 프래그먼트로 이동
+                FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.main_frame, dogModifyFragment);
                 transaction.addToBackStack(null);
                 transaction.commit();
             }

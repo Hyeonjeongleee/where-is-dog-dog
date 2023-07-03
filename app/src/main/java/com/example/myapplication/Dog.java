@@ -7,17 +7,20 @@ public class Dog implements Serializable {
     private String breed;
     private String age;
     private String gender;
+
+    private boolean isNeutered;
     private boolean isVaccinated;
 
     public Dog() {
         // 기본 생성자
     }
 
-    public Dog(String name, String breed, String age, String gender, boolean isVaccinated) {
+    public Dog(String name, String breed, String age, String gender, boolean isNeutered, boolean isVaccinated) {
         this.name = name;
         this.breed = breed;
         this.age = age;
         this.gender = gender;
+        this.isNeutered = isNeutered;
         this.isVaccinated = isVaccinated;
     }
 
@@ -60,4 +63,13 @@ public class Dog implements Serializable {
     public void setVaccinated(boolean vaccinated) {
         isVaccinated = vaccinated;
     }
+
+    public boolean isNeutered() {
+        return isNeutered;
+    }
+
+    public void setNeutered(boolean neutered) {
+        isNeutered = neutered;
+    }
+
 }

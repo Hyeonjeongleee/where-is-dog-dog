@@ -106,6 +106,7 @@ public class PopupDialog extends DialogFragment {
                         // TODO: 콕찌르기 동작 구현
                         String markerId = MainActivity.kokUserUid;
 
+                        // 상대방 userUid(콕 찔린 사람) - alarm에 나의 userUid(콕 찌른 사람) 남기기.
                         FirebaseDatabase database = FirebaseDatabase.getInstance();
                         DatabaseReference myRef = database.getReference("users")
                                         .child(markerId)
@@ -113,6 +114,32 @@ public class PopupDialog extends DialogFragment {
 
                         String myId = MainActivity.userUid;
                         myRef.child(myId).setValue(myId);
+
+                        // 상대방의 userUid 아래 kok 키 값을 true로 바꿔주기. (상대방 인식키)
+                        DatabaseReference kokReceiver = FirebaseDatabase.getInstance().getReference("users")
+                                .child(markerId);
+                        kokReceiver.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                if (dataSnapshot.hasChild("kok")) {
+                                    // "kok" 키가 이미 존재함
+                                    Log.d("TAG", "Key exists");
+                                    // "kok" 키에 값을 설정하거나 업데이트
+                                    kokReceiver.child("kok").setValue(true);
+                                } else {
+                                    // "kok" 키가 존재하지 않음
+                                    Log.d("TAG", "Key does not exist");
+                                    kokReceiver.child("kok").setValue(true);
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+                                // 에러 처리
+                                Log.e("TAG", "Error: " + databaseError.getMessage());
+                            }
+                        });
+
 
                         Toast.makeText(requireContext(), "콕 찔렀다멍!", Toast.LENGTH_SHORT).show();
                     }
@@ -126,47 +153,3 @@ public class PopupDialog extends DialogFragment {
         return builder.create();
     }
 }
-
-
-//        String markerId = "마커의 ID"; // 실제로 사용되는 마커의 ID를 여기에 지정하십시오.
-//        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("whereIsDog")
-//                .child("UserAccount").child(markerId);
-//        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                if (getContext() != null) {
-//                    // 컨텍스트가 null이 아닌 경우에만 실행
-//                    if (dataSnapshot.exists()) {
-//                        UserAccount userAccount = dataSnapshot.getValue(UserAccount.class);
-//                        if (userAccount != null) {
-//                            final String userInfo = "사용자 정보:\n" +
-//                                    "ID: " + userAccount.getIdToken() + "\n" +
-//                                    "Email: " + userAccount.getEmailId() + "\n" +
-//                                    "Password: " + userAccount.getPassword();
-//
-//                            // 다이얼로그 생성 및 표시
-//                            AlertDialog.Builder infoDialogBuilder = new AlertDialog.Builder(getContext());
-//                            infoDialogBuilder.setTitle("사용자 정보")
-//                                    .setMessage(userInfo)
-//                                    .setPositiveButton("확인", new DialogInterface.OnClickListener() {
-//                                        @Override
-//                                        public void onClick(DialogInterface dialogInterface, int i) {
-//                                            // 필요한 경우 "확인" 버튼 클릭을 처리하세요.
-//                                        }
-//                                    })
-//                                    .create()
-//                                    .show();
-//                        }
-//                    } else {
-//                        // 해당 마커에 연결된 사용자 정보가 없음을 나타내는 처리
-//                        Toast.makeText(getContext(), "해당 마커에 연결된 사용자 정보가 없습니다.", Toast.LENGTH_SHORT).show();
-//                    }
-//                }
-//            }
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError databaseError) {
-//                // 데이터베이스 조회 오류 처리
-//                Toast.makeText(getContext(), "데이터베이스 조회 오류: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
-//            }
-//        });
-//

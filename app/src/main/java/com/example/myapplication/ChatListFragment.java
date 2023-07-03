@@ -5,19 +5,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.example.myapplication.Chat;
-import com.example.myapplication.ChatListAdapter;
-import com.example.myapplication.ChatFragment;
-import com.example.myapplication.R;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.*;
+
 import java.util.ArrayList;
 import java.util.List;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class ChatListFragment extends Fragment {
 
@@ -26,6 +24,12 @@ public class ChatListFragment extends Fragment {
     private List<Chat> chatList;
     private DatabaseReference usersRef;
     private String nick;
+    private String currUserUid;
+    private String friendUid;
+    private String dogName;
+    private DatabaseReference friendReference;
+    private DatabaseReference friendDogRef;
+
 
     public ChatListFragment() {
         // Required empty public constructor
@@ -38,16 +42,42 @@ public class ChatListFragment extends Fragment {
         recyclerView = view.findViewById(R.id.chat_recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
+        chatList = new ArrayList<>();
+        chatListAdapter = new ChatListAdapter(getActivity(), chatList);
+        recyclerView.setAdapter(chatListAdapter);
+
         // Get the reference to the "users" node in the Firebase Realtime Database
-        usersRef = FirebaseDatabase.getInstance().getReference("users");
+        currUserUid = MainActivity.userUid;
+        if (currUserUid != null) {
+            friendReference = FirebaseDatabase.getInstance().getReference("users")
+                    .child(currUserUid)
+                    .child("messages");
+
+            friendReference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    for (DataSnapshot messageSnapshot : snapshot.getChildren()) {
+                        String friendUid = messageSnapshot.getKey();
+                        System.out.println("FriendUid: " + friendUid);
+                        chatList.add(new Chat(friendUid, "..."));
+                    }
+                    chatListAdapter.notifyDataSetChanged();
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    // Handle error if needed
+                }
+            });
+        }
 
         // Get the nickname of the currently logged-in user
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser != null) {
-            String userId = currentUser.getUid();
+        if (currUserUid != null) {
+            String userId = currUserUid;
 
             // Retrieve the nickname from the database based on the user's ID
-            usersRef.child(userId).child("nick").addListenerForSingleValueEvent(new ValueEventListener() {
+            usersRef = FirebaseDatabase.getInstance().getReference("users").child(currUserUid);
+            usersRef.child("dog").child("nick").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if (dataSnapshot.exists()) {
@@ -64,15 +94,6 @@ public class ChatListFragment extends Fragment {
                 }
             });
         }
-
-        chatList = new ArrayList<>();
-        // Add placeholder items to the chat list
-        chatList.add(new Chat("닉넴1", "채팅채팅"));
-        chatList.add(new Chat("닉넴2", "채팅채팅"));
-        chatList.add(new Chat("닉넴3", "채팅채팅"));
-
-        chatListAdapter = new ChatListAdapter(getActivity(), chatList);
-        recyclerView.setAdapter(chatListAdapter);
 
         // Add click listener for chat list items
         chatListAdapter.setOnItemClickListener(new ChatListAdapter.OnItemClickListener() {
@@ -96,8 +117,6 @@ public class ChatListFragment extends Fragment {
         chatListAdapter.notifyDataSetChanged();
     }
 
-
-
     private void openChatFragment() {
         ChatFragment chatFragment = new ChatFragment();
         requireActivity().getSupportFragmentManager().beginTransaction()
@@ -106,10 +125,12 @@ public class ChatListFragment extends Fragment {
                 .commit();
     }
 
-    public void onDestroy() {
-        super.onDestroy();
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
         if (chatListAdapter != null) {
             chatListAdapter.setOnItemClickListener(null);
         }
     }
+
 }

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp"
+    tools:context=".DogRegistrationFragment">
+
+    <TextView
+        android:id="@+id/textViewTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="반려견 정보 수정"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp" />
+
+    <EditText
+        android:id="@+id/editTextName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="반려견 이름"
+        android:layout_below="@id/textViewTitle"
+        android:layout_marginTop="16dp"
+        android:padding="20dp"
+        />
+
+    <EditText
+        android:id="@+id/editTextBreed"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="견종"
+        android:layout_below="@id/editTextName"
+        android:layout_marginTop="16dp"
+        android:padding="20dp"
+        />
+
+    <EditText
+        android:id="@+id/editTextAge"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="나이"
+        android:layout_below="@id/editTextBreed"
+        android:layout_marginTop="16dp"
+        android:inputType="number"
+        android:padding="20dp" />
+
+    <RadioGroup
+        android:id="@+id/radioGroupGender"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/editTextAge"
+        android:layout_marginTop="16dp">
+
+        <RadioButton
+            android:id="@+id/radioButtonMale"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="남" />
+
+        <RadioButton
+            android:id="@+id/radioButtonFemale"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="여" />
+
+    </RadioGroup>
+
+    <CheckBox
+        android:id="@+id/checkBoxNeutered"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="중성화 여부"
+        android:layout_below="@id/radioGroupGender"
+        android:layout_marginTop="16dp" />
+
+    <CheckBox
+        android:id="@+id/checkBoxVaccination"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="예방접종 여부"
+        android:layout_below="@id/checkBoxNeutered"
+        android:layout_marginTop="16dp" />
+
+    <Button
+        android:id="@+id/buttonModifydog"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="수정"
+        android:background="@drawable/rounded_corner"
+        android:layout_below="@id/checkBoxVaccination"
+        android:layout_marginTop="32dp" />
+
+</RelativeLayout>

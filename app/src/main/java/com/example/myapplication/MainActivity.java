@@ -11,6 +11,7 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
@@ -28,19 +29,22 @@ import com.google.android.material.navigation.NavigationBarView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity {
 
     public static String userUid;  // 메인에서 가지고 다닐 내 uid
-    public static String kokUserUid;  // 메인에서 가지고 다닐 상대방 uid
+    public static String kokUserUid;  // 내가 콕 찌른사람
 
     private BottomNavigationView bottomNavigationView;
     private FragmentManager fm;
     private FragmentTransaction ft;
-    private HomeFragment homeFragment;
     private MapFragment mapFragment;
     private ChatFragment chatFragment;
-    private MyinfoFragment myinfoFragment;
     private MyinfoAfterLoginFragment myinfoAfterLoginFragment;
     private RequestLoginFragment requestLoginFragment;
     private ChatListFragment chatListFragment;
@@ -82,23 +86,20 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.action_chat:
                         setFrag(2);
                         break;
-                    case R.id.action_myinfo:
-                        setFrag(3);
-                        break;
-
                 }
                 return true;
             }
         });
 
-        homeFragment = new HomeFragment();
         mapFragment = new MapFragment();
         chatFragment = new ChatFragment();
-        myinfoFragment = new MyinfoFragment();
         myinfoAfterLoginFragment = new MyinfoAfterLoginFragment();
         requestLoginFragment = new RequestLoginFragment();
         chatListFragment = new ChatListFragment();
         setFrag(0);  // 첫 프래그먼트 화면 지정
+
+        //kok 데이터를 실시간 받아오기 위한 ReceiveKok() 실행
+        ReceiveKok kokReceiver = new ReceiveKok();
     }
 
 
@@ -108,28 +109,15 @@ public class MainActivity extends AppCompatActivity {
         ft = fm.beginTransaction();
         switch (n) {
             case 0:
-                ft.replace(R.id.main_frame, homeFragment);
+                ft.replace(R.id.main_frame, myinfoAfterLoginFragment);
                 ft.commit();  // 저장을 의미
                 break;
             case 1:
-                if (userUid == null)
-                    ft.replace(R.id.main_frame, requestLoginFragment);
-                else
-                    ft.replace(R.id.main_frame, mapFragment);
+                ft.replace(R.id.main_frame, mapFragment);
                 ft.commit();
                 break;
             case 2:
-                if (userUid == null)
-                    ft.replace(R.id.main_frame, requestLoginFragment);
-                else
-                    ft.replace(R.id.main_frame, chatListFragment);
-                ft.commit();
-                break;
-            case 3:
-                if (userUid == null)
-                    ft.replace(R.id.main_frame, myinfoFragment);
-                else
-                    ft.replace(R.id.main_frame, myinfoAfterLoginFragment);
+                ft.replace(R.id.main_frame, chatListFragment);
                 ft.commit();
                 break;
         }
@@ -190,11 +178,38 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void hideBottomNavigationView() {
-        bottomNavigationView.setVisibility(View.GONE);
-    } // 하단바 사라지는 기능
+    public class ReceiveKok {
+        public String myUid = userUid;
+        DataSnapshot previousSnapshot;
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference mDataBase = database.getReference("users").child(myUid);
 
-    public void showBottomNavigationView() {
-        bottomNavigationView.setVisibility(View.VISIBLE);
+        public ReceiveKok() {
+            mDataBase.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                    String email = dataSnapshot.child("emailID").getValue(String.class); // test
+                    System.out.println("CHECKCHECK : " + email); // test
+
+                    boolean wasActive = false;
+                    if (previousSnapshot != null && previousSnapshot.child("kok").exists()) {
+                        System.out.println("CHECKCHECK : previoudSnapshot확인로직 if문 작동"); //test
+                        boolean isActive = dataSnapshot.child("kok").getValue(Boolean.class);
+                        if (isActive != wasActive) {
+                            // 알림 생성 로직 실행
+                            System.out.println("CHECKCHECK : 알림로직 if문 작동"); //test
+                        }
+                    }
+                    previousSnapshot = dataSnapshot;
+                }
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    // Getting Post failed, log a message
+                    Log.e("ReceiveKok", "loadPost:onCancelled", databaseError.toException());
+                }
+            });
+        }
     }
+
 }

@@ -102,7 +102,7 @@ public class ChatFragment extends Fragment {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         String currentUserUid = currentUser.getUid();
-        String receiverUid = "상대 사용자의 uid"; // 상대 사용자의 uid를 지정해야 합니다.
+        String receiverUid = MainActivity.kokUserUid; // 상대 사용자 uid
         myRef = FirebaseDatabase.getInstance().getReference("users")
                 .child(currentUserUid)
                 .child("messages")

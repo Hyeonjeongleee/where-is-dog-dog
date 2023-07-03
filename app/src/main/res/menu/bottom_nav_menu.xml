@@ -5,7 +5,7 @@
         android:id="@+id/action_home"
         android:enabled="true"
         android:orderInCategory="1"
-        android:icon="@drawable/baseline_home_24"
+        android:icon="@drawable/baseline_pets_24"
         android:title="Home" />
     <item
         android:id="@+id/action_map"
@@ -19,11 +19,5 @@
         android:orderInCategory="3"
         android:icon="@drawable/baseline_chat_24"
         android:title="Chat" />
-    <item
-        android:id="@+id/action_myinfo"
-        android:enabled="true"
-        android:orderInCategory="4"
-        android:icon="@drawable/baseline_child_care_24"
-        android:title="My Dog" />
 
 </menu>

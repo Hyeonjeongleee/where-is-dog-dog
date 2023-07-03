@@ -57,12 +57,11 @@ public class LoginActivity extends AppCompatActivity {
                             mFirebaseUser = mFirebaseAuth.getCurrentUser();
                             if (mFirebaseUser != null) {
                                 String uid = mFirebaseUser.getUid();
-
                                 // 메인 액티비티로 돌아갈 때 입력 값 돌려줌. 사용자 UID 넘겨주기
-                                Intent intent = new Intent();
-                                intent.putExtra("value", uid);
-                                setResult(RESULT_OK, intent);
                                 MainActivity.userUid = uid;
+
+                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                startActivity(intent);
 
                                 finish(); // 로그인 완료하면 현재 login_activity를 쓸 일이 없기 때문에 현재 액티비티 파괴
                             }

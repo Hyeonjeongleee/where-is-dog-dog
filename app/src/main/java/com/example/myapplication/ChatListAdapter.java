@@ -45,10 +45,15 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
         holder.bind(chatItem, listener);
     }
 
+
     @Override
     public int getItemCount() {
+        if (chatList == null) {
+            return 0;
+        }
         return chatList.size();
     }
+
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 

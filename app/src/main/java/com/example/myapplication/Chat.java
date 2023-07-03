@@ -3,6 +3,7 @@ package com.example.myapplication;
 public class Chat {
     private String name;
     private String nickname;
+    private String markerID;
 
     public Chat(String name, String nickname) {
         this.name = name;
@@ -23,5 +24,12 @@ public class Chat {
 
     public void setNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    public String getMarkerID() {
+        return markerID;
+    }
+    public void setMarkerID(String markerId) {
+        this.markerID = markerId;
     }
 }
