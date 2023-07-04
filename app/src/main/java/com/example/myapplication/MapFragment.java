@@ -341,7 +341,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
         markerOptions.title(markerTitle);
         markerOptions.snippet(markerSnippet);
         markerOptions.draggable(true);
-        markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.puppy));
+        markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.dog_icon1));
 
         currentMarker = mMap.addMarker(markerOptions);
 

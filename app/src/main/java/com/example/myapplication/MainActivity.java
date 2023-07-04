@@ -215,6 +215,26 @@ public class MainActivity extends AppCompatActivity {
                             ad.setNegativeButton("놀자!", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
+                                    // 상대방 userUid 가져오기
+                                    DatabaseReference alarmRef = FirebaseDatabase.getInstance().getReference("users").child("alarm");
+                                    String urUid = alarmRef.getKey();
+                                    System.out.println("test Kok's urUid : " + urUid);
+
+                                    // 상대방 'messages' Reference에 내 uid 생성
+                                    FirebaseDatabase database1 = FirebaseDatabase.getInstance();
+                                    DatabaseReference setMessage1 = database1.getReference("users")
+                                            .child(urUid)
+                                            .child("messages");
+                                    setMessage1.setValue(myUid);
+
+                                    // 내 'messages' Reference에 상대방 uid 생성
+                                    FirebaseDatabase database2 = FirebaseDatabase.getInstance();
+                                    DatabaseReference setMessage2 = database2.getReference("users")
+                                            .child(myUid)
+                                            .child("messages");
+                                    setMessage2.setValue(urUid);
+
+                                    // 사용한 alarm 삭제 및 종료
                                     dataSnapshot.child("alarm").getRef().removeValue();
                                     dialogInterface.dismiss();
                                 }
