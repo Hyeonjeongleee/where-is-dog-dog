@@ -24,6 +24,20 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
         this.chatList = chatList;
     }
 
+    public void addChat(Chat chat) {
+        chatList.add(chat);
+        notifyItemInserted(chatList.size() - 1);
+    }
+
+    public String getFriendUid(int position){
+        Chat friendChat = chatList.get(position);
+        String friendUid = friendChat.getMarkerID();
+        return friendUid;
+    }
+    public void clearChatList(){
+        chatList.clear();
+    }
+
     public interface OnItemClickListener {
         void onItemClick(int position);
     }

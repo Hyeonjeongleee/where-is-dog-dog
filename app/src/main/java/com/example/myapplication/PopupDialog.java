@@ -105,15 +105,19 @@ public class PopupDialog extends DialogFragment {
                         // "콕찌르기" 버튼이 클릭되었을 때 수행할 동작
                         // TODO: 콕찌르기 동작 구현
                         String markerId = MainActivity.kokUserUid;
+                        String myId = MainActivity.userUid;
 
-                        // 상대방 userUid(콕 찔린 사람) - alarm에 나의 userUid(콕 찌른 사람) 남기기.
+                        // <채팅방 생성을 위한> 상대방와 나의 messages아래 userUid(콕 찌른 사람) 남기기.
                         FirebaseDatabase database = FirebaseDatabase.getInstance();
                         DatabaseReference myRef = database.getReference("users")
-                                        .child(markerId)
-                                        .child("alarm");
+                                        .child(myId)
+                                        .child("message").child(markerId);
 
-                        String myId = MainActivity.userUid;
-                        myRef.child(myId).setValue(myId);
+                        DatabaseReference urRef = database.getReference("users")
+                                .child(markerId)
+                                .child("message").child(myId);
+
+//                        myRef.child(myId).setValue(myId);
 
                         // 상대방의 userUid 아래 kok 키 값을 true로 바꿔주기. (상대방 인식키)
                         DatabaseReference kokReceiver = FirebaseDatabase.getInstance().getReference("users")

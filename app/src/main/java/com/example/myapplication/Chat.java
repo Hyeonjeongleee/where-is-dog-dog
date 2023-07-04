@@ -5,9 +5,10 @@ public class Chat {
     private String nickname;
     private String markerID;
 
-    public Chat(String name, String nickname) {
+    public Chat(String name, String nickname, String friendUid) {
         this.name = name;
         this.nickname = nickname;
+        this.markerID = friendUid;
     }
 
     public String getChatName() {

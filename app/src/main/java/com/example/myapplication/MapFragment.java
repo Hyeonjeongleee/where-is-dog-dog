@@ -225,13 +225,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
                             markerOptions = new MarkerOptions()
                                     .position(userLatLng)
                                     .title(userUid)
-                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.puppy));
+                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.dog_icon1));
                         } else {
                             // 다른 사용자의 마커
                             markerOptions = new MarkerOptions()
                                     .position(userLatLng)
                                     .title(userUid)
-                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.puppy2));
+                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.dog_icon3));
                         }
 
                         // 마커 추가

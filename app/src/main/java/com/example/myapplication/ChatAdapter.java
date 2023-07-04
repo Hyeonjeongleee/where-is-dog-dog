@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,7 +9,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.core.content.ContextCompat;
 import android.view.Gravity;
-
+import com.google.firebase.database.DataSnapshot;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
@@ -49,9 +50,12 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MyViewHolder> 
     public void onBindViewHolder(MyViewHolder holder, int position) {
         ChatData chat = mDataset.get(position);
         holder.TextView_msg.setText(chat.getMsg());
+        Log.d("ChatAdapter-onBindViewHolder", chat.getMsg());
+
 
         if (chat.isSentByMe()) {
             // 내가 보낸 메시지인 경우
+            Log.d("ChatAdapter-sentByMe", "True");
             holder.TextView_msg.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_END);
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             params.gravity = Gravity.END;
@@ -61,6 +65,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MyViewHolder> 
             txtTitle.setText("");
         } else {
             // 상대방이 보낸 메시지인 경우
+            Log.d("ChatAdapter-sentByMe", "False");
             holder.TextView_msg.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             params.gravity = Gravity.START;
@@ -85,5 +90,6 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MyViewHolder> 
     public void addChat(ChatData chat) {
         mDataset.add(chat);
         notifyItemInserted(mDataset.size() - 1);
+
     }
 }

@@ -190,17 +190,11 @@ public class MainActivity extends AppCompatActivity {
             mDataBase.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                    String email = dataSnapshot.child("emailID").getValue(String.class); // test
-                    System.out.println("CHECKCHECK : " + email); // test
-
                     boolean wasActive = false;
                     if (previousSnapshot != null && previousSnapshot.child("kok").exists()) {
-                        System.out.println("CHECKCHECK : previoudSnapshot확인로직 if문 작동"); //test
                         boolean isActive = dataSnapshot.child("kok").getValue(Boolean.class);
                         if (isActive != wasActive) {
                             // 알림 생성 로직 실행
-                            System.out.println("CHECKCHECK : 알림로직 if문 작동"); //test
                             AlertDialog.Builder ad = new AlertDialog.Builder(MainActivity.this);
                             ad.setIcon(R.drawable.dog_icon);
                             ad.setTitle("콕 찌르기 도착");
@@ -213,6 +207,7 @@ public class MainActivity extends AppCompatActivity {
                             ad.setPositiveButton("다음에..", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
+                                    dataSnapshot.child("alarm").getRef().removeValue();
                                     dialogInterface.dismiss();
                                 }
                             });
@@ -220,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
                             ad.setNegativeButton("놀자!", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
-
+                                    dataSnapshot.child("alarm").getRef().removeValue();
                                     dialogInterface.dismiss();
                                 }
                             });

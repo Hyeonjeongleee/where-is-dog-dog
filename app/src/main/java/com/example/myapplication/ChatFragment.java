@@ -7,6 +7,9 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.myapplication.Chat;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 
 
 import android.animation.Animator;
@@ -44,33 +47,114 @@ public class ChatFragment extends Fragment {
     private RecyclerView.LayoutManager mLayoutManager;
     private List<ChatData> chatList;
     private String nick;
-    public String matchedUserUid;
 
     private EditText EditText_chat;
     private Button Button_send;
     private DatabaseReference myRef;
     private LinearLayout input_bar;
     private TextView txtTitle;
+    private String currentUserUid;
+    private String receiverUid;
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.activity_chat, container, false);
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // 인수 번들로부터 친구 UID를 가져옵니다
 
-        Button_send = view.findViewById(R.id.Button_send);
-        EditText_chat = view.findViewById(R.id.EditText_chat);
-        txtTitle = view.findViewById(R.id.txt_TItle);
+//        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+//        MyAdapter adapter = new MyAdapter();
+//        recyclerView.setAdapter(adapter);
+//        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        FirebaseApp.initializeApp(requireContext());
+        // set myUid and receiverUid
+        currentUserUid = MainActivity.userUid;
+        if (getArguments() != null) {
+            receiverUid = getArguments().getString("friendUid");
+        }
+        Log.d("FriendUid", receiverUid);
 
         FirebaseAuth auth = FirebaseAuth.getInstance();
         FirebaseUser user = auth.getCurrentUser();
         if (user != null) {
             String[] emailParts = user.getEmail().split("@");
             nick = emailParts[0]; // "@" 기호 이전 부분을 닉네임으로 설정합니다.
-
+            //currentUserUid = user.getUid();
+            currentUserUid = MainActivity.userUid;
+            receiverUid = receiverUid;
         } else {
             // 사용자가 로그인하지 않은 경우 처리할 내용
         }
+
+    }
+//    private void openChatFragment() {
+//        String friendUid = "55IfHb9JmBh2f0d878iNIv8O3ST2"; // 상대방의 UID를 설정해주세요
+//        ChatFragment chatFragment = new ChatFragment();
+//
+//        // 인수 번들에 친구 UID를 전달합니다
+//        Bundle bundle = new Bundle();
+//        bundle.putString("friendUid", friendUid);
+//        chatFragment.setArguments(bundle);
+//
+//        requireActivity().getSupportFragmentManager().beginTransaction()
+//                .replace(R.id.main_frame, chatFragment)
+//                .addToBackStack(null)
+//                .commit();
+//    }
+    private void printExistingChats() {
+        myRef.child(currentUserUid).child("messages").child(receiverUid).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                        ChatData chat = dataSnapshot.getValue(ChatData.class);
+
+                        // 메시지가 현재 사용자에 의해 보내졌는지 또는 상대방에 의해 보내졌는지를 확인합니다.
+                        if (chat.getNickname().equals(nick)) {
+                            chat.setSentByMe(true); // 현재 사용자가 보낸 메시지
+                        } else {
+                            chat.setSentByMe(false); // 상대방이 보낸 메시지
+                        }
+
+                        ((ChatAdapter) mAdapter).addChat(chat);
+                        System.out.println("대화내용: " + chat.getMsg()); // 대화 내용 출력
+                    }
+                    scrollToBottom(); // 채팅의 맨 아래로 스크롤합니다.
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // 에러 처리
+            }
+        });
+    }
+        @Override
+        public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+            View view = inflater.inflate(R.layout.activity_chat, container, false);
+
+            currentUserUid = MainActivity.userUid;
+            // 번들로 넘어온 uid를 receiverUid에 대입
+            if (getArguments() != null) {
+                receiverUid = getArguments().getString("friendUid");
+                System.out.println("ChatFragment_FriendUid: {}".format(receiverUid));
+            }
+
+            Button_send = view.findViewById(R.id.Button_send);
+            EditText_chat = view.findViewById(R.id.EditText_chat);
+            txtTitle = view.findViewById(R.id.txt_TItle);
+
+            FirebaseApp.initializeApp(requireContext());
+
+            FirebaseAuth auth = FirebaseAuth.getInstance();
+            FirebaseUser user = auth.getCurrentUser();
+            if (user != null) {
+                String[] emailParts = user.getEmail().split("@");
+                nick = emailParts[0]; // "@" 기호 이전 부분을 닉네임으로 설정합니다.
+
+            } else {
+                // 사용자가 로그인하지 않은 경우 처리할 내용
+            }
 
         Button_send.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,9 +168,23 @@ public class ChatFragment extends Fragment {
                     chat.setSentByMe(true); // 내가 보낸 메시지인 경우 true로 설정
                     myRef.push().setValue(chat);
                     EditText_chat.setText("");
+
+                    // 상대방의 DB에도 메시지 저장
+                    ChatData friendChat = new ChatData();
+                    friendChat.setNickname(nick);
+                    friendChat.setMsg(msg);
+                    friendChat.setSentByMe(false); // 상대방이 보낸 메시지인 경우 false로 설정
+                    //String receiverUid = receiverUid; // 상대 사용자의 uid를 지정해야 합니다.
+                    DatabaseReference friendRef = FirebaseDatabase.getInstance().getReference("users")
+                            .child(receiverUid)
+                            .child("messages")
+                            .child(currentUserUid);
+                    friendRef.push().setValue(friendChat);
+                    printExistingChats();
                 }
             }
         });
+
 
 
         mRecyclerView = view.findViewById(R.id.my_recycler_view);
@@ -99,15 +197,15 @@ public class ChatFragment extends Fragment {
         mRecyclerView.setAdapter(mAdapter);
 
         // Write a message to the database
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        String currentUserUid = currentUser.getUid();
-        String receiverUid = MainActivity.kokUserUid; // 상대 사용자 uid
+        //FirebaseDatabase database = FirebaseDatabase.getInstance();
+        //myRef = database.getReference("message");
+        //FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        //String receiverUid = "hE6anJk9oINffKoKMvjGxbAAuRw2";
+        //String currentUserUid = currentUser.getUid();
         myRef = FirebaseDatabase.getInstance().getReference("users")
                 .child(currentUserUid)
                 .child("messages")
-                .child(receiverUid);
-
+                .child(receiverUid);;
 
         myRef.addChildEventListener(new ChildEventListener() {
             @Override
@@ -115,15 +213,9 @@ public class ChatFragment extends Fragment {
                 Log.d("CHATCHAT", dataSnapshot.getValue().toString());
                 ChatData chat = dataSnapshot.getValue(ChatData.class);
 
-                // 현재 사용자의 닉네임과 받아온 채팅 데이터의 닉네임 비교
-                if (chat.getNickname().equals(nick)) {
-                    chat.setSentByMe(true); // 내가 보낸 메시지인 경우 true로 설정
-                } else {
-                    chat.setSentByMe(false); // 상대방이 보낸 메시지인 경우 false로 설정
-                }
-
                 ((ChatAdapter) mAdapter).addChat(chat);
                 scrollToBottom(); // 가장 하단으로 스크롤
+                printExistingChats();
 
             }
 
