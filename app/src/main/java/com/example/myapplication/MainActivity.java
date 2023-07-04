@@ -182,6 +182,7 @@ public class MainActivity extends AppCompatActivity {
 
     public class ReceiveKok {
         public String myUid = userUid;
+        public String urUid;
         DataSnapshot previousSnapshot;
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference mDataBase = database.getReference("users").child(myUid);
@@ -204,6 +205,28 @@ public class MainActivity extends AppCompatActivity {
                             DatabaseReference mDataBase = database.getReference("users").child(myUid);
                             mDataBase.child("kok").setValue(false);
 
+                            // 상대방 userUid 가져오기
+                            DatabaseReference alarmRef = FirebaseDatabase.getInstance().getReference("users").child(myUid).child("alarm");
+                            alarmRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    // 데이터 스냅샷에서 하위 레퍼런스의 값을 가져오기
+                                    if (dataSnapshot.exists()) {
+                                        for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                                            urUid = childSnapshot.getValue(String.class);
+                                        }
+                                    } else {
+                                        // "alarm" 레퍼런스가 존재하지 않는 경우 처리
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+                                    // 에러 처리
+                                }
+                            });
+                            System.out.println("test Kok's urUid : " + urUid);
+
                             ad.setPositiveButton("다음에..", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
@@ -215,23 +238,20 @@ public class MainActivity extends AppCompatActivity {
                             ad.setNegativeButton("놀자!", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                    // 상대방 userUid 가져오기
-                                    DatabaseReference alarmRef = FirebaseDatabase.getInstance().getReference("users").child("alarm");
-                                    String urUid = alarmRef.getKey();
-                                    System.out.println("test Kok's urUid : " + urUid);
-
                                     // 상대방 'messages' Reference에 내 uid 생성
                                     FirebaseDatabase database1 = FirebaseDatabase.getInstance();
                                     DatabaseReference setMessage1 = database1.getReference("users")
                                             .child(urUid)
-                                            .child("messages");
+                                            .child("messages")
+                                            .child(myUid);
                                     setMessage1.setValue(myUid);
 
                                     // 내 'messages' Reference에 상대방 uid 생성
                                     FirebaseDatabase database2 = FirebaseDatabase.getInstance();
                                     DatabaseReference setMessage2 = database2.getReference("users")
                                             .child(myUid)
-                                            .child("messages");
+                                            .child("messages")
+                                            .child(urUid);
                                     setMessage2.setValue(urUid);
 
                                     // 사용한 alarm 삭제 및 종료

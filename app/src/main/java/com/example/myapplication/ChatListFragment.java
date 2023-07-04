@@ -51,6 +51,7 @@ public class ChatListFragment extends Fragment {
     private String nick;
     private String currUserUid;
     private DatabaseReference friendReference;
+    private DatabaseReference friendDogRef;
     public ChatListFragment() {
         // Required empty public constructor
     }
@@ -71,20 +72,56 @@ public class ChatListFragment extends Fragment {
             friendReference = FirebaseDatabase.getInstance().getReference("users")
                     .child(currUserUid)
                     .child("messages");
-
+////
             friendReference.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     //chatList.clear();
                     chatListAdapter.clearChatList();
+                    int pos = 0;
                     for (DataSnapshot messageSnapshot : snapshot.getChildren()) {
                         String friendUid = messageSnapshot.getKey();
                         System.out.println("FriendUid: " + friendUid);
 
-                        String friendDogName = getFriendDogName(friendUid);
+                        //setFriendDogName(friendUid);
+                        friendDogRef = FirebaseDatabase.getInstance()
+                                .getReference("users")
+                                .child(friendUid)
+                                .child("dogs");
 
-                        //chatList.add(new Chat(friendUid, "..."));
-                        chatListAdapter.addChat(new Chat(friendDogName,"test nickname", friendUid));
+                        friendDogRef.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                // iterate the number of dogs
+                                if (snapshot.exists()) {
+                                    for (DataSnapshot dogSnapshot : snapshot.getChildren()) {
+                                        String dogName = dogSnapshot.child("name").getValue(String.class);
+
+                                        //Log.d("get Dogname from DB", friendDogName);
+                                        //f_DogName.add(friendDogName);
+
+                                        chatListAdapter.addChat(new Chat(dogName, "testtest", friendUid));
+                                        chatListAdapter.notifyDataSetChanged();
+                                        break;
+                                    }
+                                }
+                                else{
+                                    chatListAdapter.addChat(new Chat("김멍멍", "견주가 아님", friendUid));
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+                                Log.d("ChatListFragment_DogName", "No Dog Name Here");
+                            }
+                        });
+
+//                        String dogName = f_DogName.get(pos);
+//                        Log.d("onCreatView", String.format("pos: %d, name: %s", pos, dogName));
+//                        //String friendDogName
+//                        //chatList.add(new Chat(friendUid, "..."));
+//                        chatListAdapter.addChat(new Chat(dogName,"test nickname", friendUid));
+//                        pos++;
                     }
                     chatListAdapter.notifyDataSetChanged();
                 }
@@ -95,7 +132,7 @@ public class ChatListFragment extends Fragment {
                 }
             });
         }
-
+////////
         // Get the nickname of the currently logged-in user
         if (currUserUid != null) {
             String userId = currUserUid;
@@ -142,7 +179,7 @@ public class ChatListFragment extends Fragment {
                 .child("dogs");
 
         final String[] dogName = {"김멍멍"};
-
+/////
         friendDogRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -166,7 +203,7 @@ public class ChatListFragment extends Fragment {
 
         return dogName[0];
     }
-
+//////
 
     private void updateChatListWithNickname() {
         // Update the chat list with the retrieved nickname
