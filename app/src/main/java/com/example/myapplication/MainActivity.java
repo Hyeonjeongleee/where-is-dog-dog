@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -8,6 +9,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -199,6 +201,30 @@ public class MainActivity extends AppCompatActivity {
                         if (isActive != wasActive) {
                             // 알림 생성 로직 실행
                             System.out.println("CHECKCHECK : 알림로직 if문 작동"); //test
+                            AlertDialog.Builder ad = new AlertDialog.Builder(MainActivity.this);
+                            ad.setIcon(R.drawable.dog_icon);
+                            ad.setTitle("콕 찌르기 도착");
+                            ad.setMessage("친구야, 같이 놀자멍!");
+
+                            FirebaseDatabase database = FirebaseDatabase.getInstance();
+                            DatabaseReference mDataBase = database.getReference("users").child(myUid);
+                            mDataBase.child("kok").setValue(false);
+
+                            ad.setPositiveButton("다음에..", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    dialogInterface.dismiss();
+                                }
+                            });
+
+                            ad.setNegativeButton("놀자!", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+
+                                    dialogInterface.dismiss();
+                                }
+                            });
+                            ad.show();
                         }
                     }
                     previousSnapshot = dataSnapshot;
