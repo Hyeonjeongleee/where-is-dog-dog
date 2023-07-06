@@ -329,16 +329,43 @@ public class MainActivity extends AppCompatActivity {
                                     DatabaseReference mDataBase = database.getReference("users").child(urUid);
                                     mDataBase.child("CheckMatched").setValue("0");
 
-                                    Toast.makeText(MainActivity.this, "콕 찌르기 성공! 채팅방이 생성되었습니다.", Toast.LENGTH_SHORT).show();
+                                    AlertDialog.Builder ad = new AlertDialog.Builder(MainActivity.this);
+                                    ad.setIcon(R.drawable.dog_icon);
+                                    ad.setTitle("콕 찌르기 수락");
+                                    ad.setMessage("콕 찌른 상대와 채팅이 생성 되었습니다! 멍!");
+
+                                    ad.setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            dialogInterface.dismiss();
+                                        }
+                                    });
+                                    ad.show();
+
+                                    //Toast.makeText(MainActivity.this, "콕 찌르기 성공! 채팅방이 생성되었습니다.", Toast.LENGTH_SHORT).show();
 
                                 } else if (dataSnapshot.child(urUid).child("CheckMatched").getValue(String.class).equals("2")) {
                                     FirebaseDatabase database = FirebaseDatabase.getInstance();
                                     DatabaseReference mDataBase = database.getReference("users").child(urUid);
                                     mDataBase.child("CheckMatched").setValue("0");
 
-                                    Toast.makeText(MainActivity.this, "콕 찌르기 성공! 채팅방이 생성되었습니다.", Toast.LENGTH_SHORT).show();
+                                    AlertDialog.Builder ad = new AlertDialog.Builder(MainActivity.this);
+                                    ad.setIcon(R.drawable.sad_tear);
+                                    ad.setTitle("콕 찌르기 거절");
+                                    ad.setMessage("다음에 만나요, 멍!");
 
+                                    ad.setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            dialogInterface.dismiss();
+                                        }
+                                    });
+                                    ad.show();
+                                    //Toast.makeText(MainActivity.this, "콕 찌르기 실패! 다음에 만나자, 멍!", Toast.LENGTH_SHORT).show();
                                 }
+                                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                                DatabaseReference mDataBase = database.getReference("users").child(urUid);
+                                mDataBase.child("CheckMatched").setValue("0");
                             }
                         }
                     }
