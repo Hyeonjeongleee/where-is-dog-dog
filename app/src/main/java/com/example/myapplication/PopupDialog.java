@@ -137,15 +137,15 @@ public class PopupDialog extends DialogFragment {
                                     kokReceiver.child("kok").setValue(true);
                                 }
 
-                                if (dataSnapshot.hasChild("checkMatched")) {
-                                    // "checkMatched" 키가 이미 존재함
-                                    Log.d("TAG", "checkMatched Key exists");
-                                    // "checkMatched" 키에 값을 설정하거나 업데이트
-                                    kokReceiver.child("checkMatched").setValue("0");  // "0" : default, "1" : 수락, "2" : 거절
+                                if (dataSnapshot.hasChild("CheckMatched")) {
+                                    // "CheckMatched" 키가 이미 존재함
+                                    Log.d("TAG", "CheckMatched Key exists");
+                                    // "CheckMatched" 키에 값을 설정하거나 업데이트
+                                    kokReceiver.child("CheckMatched").setValue("0");  // "0" : default, "1" : 수락, "2" : 거절
                                 } else {
                                     // "kok" 키가 존재하지 않음
-                                    Log.d("TAG", "checkMatched Key does not exist");
-                                    kokReceiver.child("checkMatched").setValue("0");
+                                    Log.d("TAG", "CheckMatched Key does not exist");
+                                    kokReceiver.child("CheckMatched").setValue("0");
                                 }
                             }
 
