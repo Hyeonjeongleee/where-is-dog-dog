@@ -27,6 +27,8 @@ import android.widget.Toast;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.Random;
+
 public class PopupDialog extends DialogFragment {
     private static final String TAG = "popUp";
     private String markerId;
@@ -57,8 +59,12 @@ public class PopupDialog extends DialogFragment {
         TextView dogGenderTextView = dialogView.findViewById(R.id.tv_dog_gender);
         TextView dogVaccinatedTextView = dialogView.findViewById(R.id.tv_dog_vaccinated);
 
-
-        dogPhotoImageView.setImageResource(R.drawable.dog_image);
+        // (야매) 개 사진 랜덤하게 나오기.
+        int[] dogImages = {R.drawable.dog_image, R.drawable.dog_image2, R.drawable.dog_image4};
+        Random random = new Random();
+        int randomIndex = random.nextInt(dogImages.length);
+        int randomImage = dogImages[randomIndex];
+        dogPhotoImageView.setImageResource(randomImage);
 
         // 반려견 정보 받아오기
         String userUid = markerId;
@@ -122,13 +128,24 @@ public class PopupDialog extends DialogFragment {
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                 if (dataSnapshot.hasChild("kok")) {
                                     // "kok" 키가 이미 존재함
-                                    Log.d("TAG", "Key exists");
+                                    Log.d("TAG", "kok Key exists");
                                     // "kok" 키에 값을 설정하거나 업데이트
                                     kokReceiver.child("kok").setValue(true);
                                 } else {
                                     // "kok" 키가 존재하지 않음
-                                    Log.d("TAG", "Key does not exist");
+                                    Log.d("TAG", "kok Key does not exist");
                                     kokReceiver.child("kok").setValue(true);
+                                }
+
+                                if (dataSnapshot.hasChild("checkMatched")) {
+                                    // "checkMatched" 키가 이미 존재함
+                                    Log.d("TAG", "checkMatched Key exists");
+                                    // "checkMatched" 키에 값을 설정하거나 업데이트
+                                    kokReceiver.child("checkMatched").setValue("0");  // "0" : default, "1" : 수락, "2" : 거절
+                                } else {
+                                    // "kok" 키가 존재하지 않음
+                                    Log.d("TAG", "checkMatched Key does not exist");
+                                    kokReceiver.child("checkMatched").setValue("0");
                                 }
                             }
 

@@ -100,7 +100,7 @@ public class ChatListFragment extends Fragment {
                                         //Log.d("get Dogname from DB", friendDogName);
                                         //f_DogName.add(friendDogName);
 
-                                        chatListAdapter.addChat(new Chat(dogName, "testtest", friendUid));
+                                        chatListAdapter.addChat(new Chat(dogName, "", friendUid));
                                         chatListAdapter.notifyDataSetChanged();
                                         break;
                                     }

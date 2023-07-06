@@ -174,6 +174,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Activit
             }
         }
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
+        mMap.getUiSettings().setMapToolbarEnabled(false); // Show map 버튼 삭제
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(@NonNull LatLng latLng) {

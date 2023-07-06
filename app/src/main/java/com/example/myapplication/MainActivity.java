@@ -102,6 +102,9 @@ public class MainActivity extends AppCompatActivity {
 
         //kok 데이터를 실시간 받아오기 위한 ReceiveKok() 실행
         ReceiveKok kokReceiver = new ReceiveKok();
+
+        //kok 보낸거 수락했는지 데이터 실시간 받아오기 위한
+        CheckMatched checkMatched = new CheckMatched();
     }
 
 
@@ -230,6 +233,15 @@ public class MainActivity extends AppCompatActivity {
                             ad.setPositiveButton("다음에..", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
+                                    Toast.makeText(MainActivity.this, "다음에 만나요, 멍!", Toast.LENGTH_SHORT).show();
+
+                                    // 내 'CheckMatched' Reference 키 값 변경 > 콕 찌른 사람에게 거절 알람.
+                                    FirebaseDatabase database3 = FirebaseDatabase.getInstance();
+                                    DatabaseReference setMessage3 = database3.getReference("users")
+                                            .child(myUid)
+                                            .child("CheckMatched"); // "0" : default, "1" : 수락, "2" : 거절 (PopupDialog에서 콕 찌를때 상대유저 0으로 설정)
+                                    setMessage3.setValue("2");
+
                                     dataSnapshot.child("alarm").getRef().removeValue();
                                     dialogInterface.dismiss();
                                 }
@@ -238,6 +250,8 @@ public class MainActivity extends AppCompatActivity {
                             ad.setNegativeButton("놀자!", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
+                                    Toast.makeText(MainActivity.this, "상대방과 채팅이 생성되었습니다! 만나요, 멍!", Toast.LENGTH_SHORT).show();
+
                                     // 상대방 'messages' Reference에 내 uid 생성
                                     FirebaseDatabase database1 = FirebaseDatabase.getInstance();
                                     DatabaseReference setMessage1 = database1.getReference("users")
@@ -254,6 +268,13 @@ public class MainActivity extends AppCompatActivity {
                                             .child(urUid);
                                     setMessage2.setValue(urUid);
 
+                                    // 내 'CheckMatched' Reference 키 값 변경 > 콕 찌른 사람에게 수락 알람.
+                                    FirebaseDatabase database3 = FirebaseDatabase.getInstance();
+                                    DatabaseReference setMessage3 = database3.getReference("users")
+                                            .child(myUid)
+                                            .child("CheckMatched"); // "0" : default, "1" : 수락, "2" : 거절 (PopupDialog에서 콕 찌를때 상대유저 0으로 설정)
+                                    setMessage3.setValue("1");
+
                                     // 사용한 alarm 삭제 및 종료
                                     dataSnapshot.child("alarm").getRef().removeValue();
                                     dialogInterface.dismiss();
@@ -268,6 +289,71 @@ public class MainActivity extends AppCompatActivity {
                 public void onCancelled(DatabaseError databaseError) {
                     // Getting Post failed, log a message
                     Log.e("ReceiveKok", "loadPost:onCancelled", databaseError.toException());
+                }
+            });
+        }
+    }
+
+    // Check Matched - Koker
+    public class CheckMatched {
+        public String myUid = userUid;
+        public String urUid = kokUserUid;
+        DataSnapshot previousSnapshot;
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference mDataBase = database.getReference("users");
+
+        public CheckMatched() {
+            mDataBase.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    boolean wasActive = false;
+                    if (urUid != null && previousSnapshot.child(urUid) != null && previousSnapshot.child(urUid).child("CheckMatched").exists()) {
+                        boolean isActive = !dataSnapshot.child("CheckMatched").getValue(String.class).equals("0");
+                        if (isActive != wasActive) {
+                            // 알림 생성 로직 실행
+                            if (dataSnapshot.child("CheckMatched").getValue(String.class).equals("1")) {
+                                AlertDialog.Builder ad = new AlertDialog.Builder(MainActivity.this);
+                                ad.setIcon(R.drawable.dog_icon);
+                                ad.setTitle("콕 찌르기 수락");
+                                ad.setMessage("콕 찌른 상대와 채팅이 생성 되었습니다! 멍!");
+
+                                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                                DatabaseReference mDataBase = database.getReference("users").child(urUid);
+                                mDataBase.child("CheckMatched").setValue("0");
+
+                                ad.setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        dialogInterface.dismiss();
+                                    }
+                                });
+                                ad.show();
+                            } else {
+                                AlertDialog.Builder ad = new AlertDialog.Builder(MainActivity.this);
+                                ad.setIcon(R.drawable.sad_tear);
+                                ad.setTitle("콕 찌르기 거절");
+                                ad.setMessage("다음에 만나요, 멍!");
+
+                                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                                DatabaseReference mDataBase = database.getReference("users").child(urUid);
+                                mDataBase.child("CheckMatched").setValue("0");
+
+                                ad.setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        dialogInterface.dismiss();
+                                    }
+                                });
+                                ad.show();
+                            }
+                        }
+                    }
+                    previousSnapshot = dataSnapshot;
+                }
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    // Getting Post failed, log a message
+                    Log.e("CheckMatched", "loadPost:onCancelled", databaseError.toException());
                 }
             });
         }

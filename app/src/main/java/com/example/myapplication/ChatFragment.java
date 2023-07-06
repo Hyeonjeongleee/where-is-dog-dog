@@ -2,8 +2,10 @@ package com.example.myapplication;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.myapplication.Chat;
@@ -15,6 +17,7 @@ import com.google.firebase.database.ValueEventListener;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.content.DialogInterface;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
@@ -50,6 +53,7 @@ public class ChatFragment extends Fragment {
 
     private EditText EditText_chat;
     private Button Button_send;
+    private Button Button_finish;
     private DatabaseReference myRef;
     private LinearLayout input_bar;
     private TextView txtTitle;
@@ -143,6 +147,7 @@ public class ChatFragment extends Fragment {
             Button_send = view.findViewById(R.id.Button_send);
             EditText_chat = view.findViewById(R.id.EditText_chat);
             txtTitle = view.findViewById(R.id.txt_TItle);
+            Button_finish = view.findViewById(R.id.finish_button);
 
             FirebaseApp.initializeApp(requireContext());
 
@@ -156,7 +161,52 @@ public class ChatFragment extends Fragment {
                 // 사용자가 로그인하지 않은 경우 처리할 내용
             }
 
-        Button_send.setOnClickListener(new View.OnClickListener() {
+            Button_finish.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    AlertDialog.Builder ad = new AlertDialog.Builder(getActivity());
+                    ad.setIcon(R.drawable.sad_tear);
+                    ad.setTitle("잘가라 멍!");
+                    ad.setMessage("채팅방이 사라지고, 대화 내용이 삭제됩니다.");
+
+                    ad.setPositiveButton("취소", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                        }
+                    });
+
+                    ad.setNegativeButton("나가기", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            FirebaseDatabase database1 = FirebaseDatabase.getInstance();
+                            DatabaseReference setMessage1 = database1.getReference("users")
+                                    .child(receiverUid)
+                                    .child("messages")
+                                    .child(currentUserUid);
+
+                        // 내 'messages' Reference에 상대방 uid 생성
+                            FirebaseDatabase database2 = FirebaseDatabase.getInstance();
+                            DatabaseReference setMessage2 = database2.getReference("users")
+                                    .child(currentUserUid)
+                                    .child("messages")
+                                    .child(receiverUid);
+
+                        // 데이터 삭제
+                            setMessage1.removeValue();
+                            setMessage2.removeValue();
+
+                        // 이전 Fragment로 돌아가기
+                            FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+                            fragmentManager.popBackStack();
+                            dialogInterface.dismiss();
+                        }
+                    });
+                    ad.show();
+                }
+            });
+
+            Button_send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String msg = EditText_chat.getText().toString();
