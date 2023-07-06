@@ -242,12 +242,6 @@ public class MainActivity extends AppCompatActivity {
                                             .child("CheckMatched"); // "0" : default, "1" : 수락, "2" : 거절 (PopupDialog에서 콕 찌를때 상대유저 0으로 설정)
                                     setMessage3.setValue("2");
 
-                                    FirebaseDatabase database4 = FirebaseDatabase.getInstance();
-                                    DatabaseReference setMessage4 = database4.getReference("users")
-                                            .child(myUid)
-                                            .child("CheckMatched"); // "0" : default, "1" : 수락, "2" : 거절 (PopupDialog에서 콕 찌를때 상대유저 0으로 설정)
-                                    setMessage4.setValue("0");
-
                                     dataSnapshot.child("alarm").getRef().removeValue();
                                     dialogInterface.dismiss();
                                 }
@@ -280,12 +274,6 @@ public class MainActivity extends AppCompatActivity {
                                             .child(myUid)
                                             .child("CheckMatched"); // "0" : default, "1" : 수락, "2" : 거절 (PopupDialog에서 콕 찌를때 상대유저 0으로 설정)
                                     setMessage3.setValue("1");
-
-                                    FirebaseDatabase database4 = FirebaseDatabase.getInstance();
-                                    DatabaseReference setMessage4 = database4.getReference("users")
-                                            .child(myUid)
-                                            .child("CheckMatched"); // "0" : default, "1" : 수락, "2" : 거절 (PopupDialog에서 콕 찌를때 상대유저 0으로 설정)
-                                    setMessage4.setValue("0");
 
                                     // 사용한 alarm 삭제 및 종료
                                     dataSnapshot.child("alarm").getRef().removeValue();
